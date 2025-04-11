@@ -3,16 +3,17 @@ package src;
 import javax.swing.*;
 import java.awt.*;
 
-public class ButtonWithIcon extends JFrame {
+public class BlackJackMainGUI {
+    private JFrame frame;
 
-    public ButtonWithIcon() {
+    public BlackJackMainGUI() {
         ImageIcon logo = new ImageIcon("src/my_logo.jpg");
 
         // Set up the frame
-        this.setTitle("Black Jack Game");
-        this.setSize(800, 600);
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setIconImage(logo.getImage());
+        frame = new JFrame("Black Jack Game");
+        frame.setSize(800, 600);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setIconImage(logo.getImage());
 
         // Create a panel with the green background color
         JPanel mainPanel = new JPanel();
@@ -61,8 +62,8 @@ public class ButtonWithIcon extends JFrame {
         mainPanel.add(buttonPanel, BorderLayout.CENTER);
 
         // Add panel to frame
-        this.add(mainPanel);
+        frame.add(mainPanel);
 
-        this.setVisible(true);
+        frame.setVisible(true);
     }
 }

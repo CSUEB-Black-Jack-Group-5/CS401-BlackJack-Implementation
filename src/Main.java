@@ -2,6 +2,6 @@ package src;
 
 public class Main {
     public static void main(String[] args) {
-         new ButtonWithIcon();
+        BlackJackMainGUI frame = new BlackJackMainGUI();
     }
 }
