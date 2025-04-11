@@ -3,7 +3,7 @@ public enum Suit {
     HEARTS,
     SPADES,
     DIAMONDS;
-
+//edit
     public int getValue(){
         return switch (this) {
             case CLUBS -> 0;
