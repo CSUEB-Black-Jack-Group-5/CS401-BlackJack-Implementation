@@ -53,7 +53,7 @@ import java.time.LocalDateTime;
     }
 
     /**
-    * Returns the number of seconds that have passed since the timer started
+    * Returns the # of seconds that have passed since the timer started
      */
     public int getElapsedTime() {
         if(startTime == null) {
