@@ -38,6 +38,7 @@ import java.time.LocalDateTime;
         if(endTime == null) {
             return LocalDateTime.now().isAfter(endTime);
         }
+        return false;
     }
 
     public LocalDateTime getStartTime() {
