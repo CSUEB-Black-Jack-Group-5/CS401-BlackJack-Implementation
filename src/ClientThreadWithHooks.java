@@ -1,5 +1,3 @@
-package server;
-
 import networking.Message;
 
 import java.io.IOException;

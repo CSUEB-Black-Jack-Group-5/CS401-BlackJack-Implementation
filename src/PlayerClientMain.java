@@ -1,5 +1,3 @@
-package client;
-
 public class PlayerClientMain {
     static ClientWithHooks client;
     static LoginGUI loginGui;           // Todo: LoginGUI

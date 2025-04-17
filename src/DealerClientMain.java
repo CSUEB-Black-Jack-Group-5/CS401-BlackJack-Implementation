@@ -1,5 +1,3 @@
-package client;
-
 public class DealerClientMain {
     static ClientWithHooks client;
     static LoginGUI loginGUI;           // TODO: LoginGUI
