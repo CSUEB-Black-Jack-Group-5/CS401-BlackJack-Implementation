@@ -17,19 +17,19 @@ public class PlayerClientMain {
         playerGUI = new PlayerGUI(client);
 
         client = new ClientWithHooks(PLAYER, "localhost", 3333);
-        client.addMessageHook(Login.Response.class, (res) -> {
+        client.addMessageHook(Message.Login.Response.class, (res) -> {
             // Note: By the time this code runs the login has already happened
             loginGui.close();
             playerGUI.show();
         });
-        client.addMessageHook(Hit.Response.class, (res) -> {});
-        client.addMessageHook(Stand.Response.class, (res) -> {});
-        client.addMessageHook(Leave.Response.class, (res) -> {});
-        client.addMessageHook(LobbyData.Response.class, (res) -> {});
-        client.addMessageHook(TableData.Response.class, (res) -> {});
-        client.addMessageHook(ClockSync.Response.class, (res) -> {});
-        client.addMessageHook(GameData.Response.class, (res) -> {});
-        client.addMessageHook(PlayerReady.Response.class, (res) -> {});
-        client.addMessageHook(PlayerLeave.Response.class, (res) -> {});
+        client.addMessageHook(Message.Hit.Response.class, (res) -> {});
+        client.addMessageHook(Message.Stand.Response.class, (res) -> {});
+        client.addMessageHook(Message.Leave.Response.class, (res) -> {});
+        client.addMessageHook(Message.LobbyData.Response.class, (res) -> {});
+        client.addMessageHook(Message.TableData.Response.class, (res) -> {});
+        client.addMessageHook(Message.ClockSync.Response.class, (res) -> {});
+        client.addMessageHook(Message.GameData.Response.class, (res) -> {});
+        client.addMessageHook(Message.PlayerReady.Response.class, (res) -> {});
+        client.addMessageHook(Message.PlayerLeave.Response.class, (res) -> {});
     }
 }

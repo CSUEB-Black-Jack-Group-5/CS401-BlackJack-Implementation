@@ -15,14 +15,14 @@ public class DealerClientMain {
         loginGUI = new LoginGUI(client);
         dealerGUI = new DealerGUI(client);
 
-        client.addMessageHook(Login.Response.class, (res) -> {
+        client.addMessageHook(Message.Login.Response.class, (res) -> {
             loginGUI.close();
             dealerGUI.show();
         });
-        client.addMessageHook(Leave.Response.class, (res) -> {});
-        client.addMessageHook(TableData.Response.class, (res) -> {});
-        client.addMessageHook(ClockSync.Response.class, (res) -> {});
-        client.addMessageHook(GameData.Response.class, (res) -> {});
-        client.addMessageHook(LobbyData.Response.class, (res) -> {});
+        client.addMessageHook(Message.Leave.Response.class, (res) -> {});
+        client.addMessageHook(Message.TableData.Response.class, (res) -> {});
+        client.addMessageHook(Message.ClockSync.Response.class, (res) -> {});
+        client.addMessageHook(Message.GameData.Response.class, (res) -> {});
+        client.addMessageHook(Message.LobbyData.Response.class, (res) -> {});
     }
 }
