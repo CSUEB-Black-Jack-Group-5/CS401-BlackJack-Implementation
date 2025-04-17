@@ -1,4 +1,3 @@
-import networking.Message;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.ObjectInputStream;
