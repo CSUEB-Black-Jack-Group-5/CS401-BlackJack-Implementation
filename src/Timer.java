@@ -1,10 +1,11 @@
+package src;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
 /**
  * Timer class implementation based off the UML Diagram
  */
-    public class Timer {
+public class Timer {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     int duration = 0; // in seconds
@@ -54,7 +55,7 @@ import java.time.LocalDateTime;
     }
 
     /**
-    * Returns the # of seconds that have passed since the timer started
+     * Returns the # of seconds that have passed since the timer started
      */
     public int getElapsedTime() {
         if(startTime == null) {
