@@ -65,6 +65,10 @@ public class Player {
         return activeHandRef.getNumCards() == 2 && activeHandRef.getTotalValue() == 21;
     }
 
+    public CardHand getHand() {
+        return hand;
+    }
+
     public Wallet getWallet() {
         return wallet;
     }
