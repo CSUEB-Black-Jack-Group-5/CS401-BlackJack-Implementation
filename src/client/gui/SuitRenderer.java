@@ -1,3 +1,5 @@
+package client.gui;
+
 import java.awt.*;
 
 public class SuitRenderer {

@@ -1,3 +1,5 @@
+package game;
+
 public class CardHand {
     private int numCards;
     private Card[] hand;

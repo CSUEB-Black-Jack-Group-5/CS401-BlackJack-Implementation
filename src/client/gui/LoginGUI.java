@@ -1,4 +1,4 @@
-
+package client.gui;
 ///  Login GUI
 
 import javax.swing.*;
@@ -186,7 +186,7 @@ public class LoginGUI extends JDialog {
                     g2d.drawLine(i, 0, i, getHeight());
                 }
 
-                /// Card suits as decoration
+                /// game.Card suits as decoration
                 SuitRenderer.drawCardSuit(g2d, 50, 40, "♠", new Color(200, 200, 200));
                 SuitRenderer.drawCardSuit(g2d, getWidth() - 50, 40, "♥", new Color(200, 0, 0));
                 SuitRenderer.drawCardSuit(g2d, 50, getHeight() - 40, "♣", new Color(200, 200, 200));

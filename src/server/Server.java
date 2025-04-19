@@ -1,3 +1,5 @@
+package server;
+
 import networking.Message;
 
 import java.io.IOException;
@@ -148,7 +150,7 @@ public class Server {
                         if (message instanceof Message.Login.Request loginRequest) {
                             String username = loginRequest.getUsername();
                             String password = loginRequest.getPassword();
-                            // Server determines whether player or dealer
+                            // server.Server determines whether player or dealer
 
                             if (!checkCredentials(username, password)) writer.writeObject(Message.Login.Response(/* fail status */));
 

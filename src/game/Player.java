@@ -1,3 +1,5 @@
+package game;
+
 public class Player {
     private static int idCount = 0;
     private int playerId;

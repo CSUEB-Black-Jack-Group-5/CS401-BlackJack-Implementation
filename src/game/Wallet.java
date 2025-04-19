@@ -1,3 +1,5 @@
+package game;
+
 public class Wallet {
     private float funds;
 

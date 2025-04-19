@@ -1,5 +1,5 @@
-
-///  Animated Card
+package client.gui;
+///  Animated game.Card
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -41,7 +41,7 @@ public class CardAnimate {
             rotation = -rotation;
         }
 
-        ///  Card don't get over screen
+        ///  game.Card don't get over screen
         x = Math.max(0, Math.min(800, x));
         y = Math.max(0, Math.min(600, y));
     }
@@ -54,14 +54,14 @@ public class CardAnimate {
         g2.rotate(rotation);
         g2.scale(scale, scale);
 
-        /// Card Background
+        /// game.Card Background
         g2.setColor(Color.WHITE);
         g2.fillRoundRect(-30, -45, 60, 90, 10, 10);
         g2.setColor(Color.BLACK);
         g2.setStroke(new BasicStroke(2));
         g2.drawRoundRect(-30, -45, 60, 90, 10, 10);
 
-        /// Card value and suit
+        /// game.Card value and suit
         g2.setFont(new Font("Arial", Font.BOLD, 20));
         FontMetrics fm = g2.getFontMetrics();
 

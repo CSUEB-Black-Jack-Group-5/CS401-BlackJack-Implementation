@@ -1,3 +1,5 @@
+package server;
+
 import java.net.Socket;
 
 public class DealerClientThread extends ClientThreadWithHooks {

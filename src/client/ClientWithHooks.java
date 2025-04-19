@@ -1,3 +1,7 @@
+package client;
+
+import networking.Message;
+
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.ObjectInputStream;
@@ -75,7 +79,7 @@ public class ClientWithHooks {
                     break;
                 } catch (IOException e) {
                     running = false;
-                    System.err.println("Server stopped. Client exiting...");
+                    System.err.println("server.Server stopped. Client exiting...");
                     System.exit(0);
                 }
             }
