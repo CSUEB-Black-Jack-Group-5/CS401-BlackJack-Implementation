@@ -13,14 +13,24 @@ public class CardHand {
 
     public int getTotalValue(){
         int total = 0;
-        // TODO: get card total
+        for(int i = 0; i < numCards; i++){
+            // need to change return type of card class
+            total += hand[i].getValue();
+        }
         return total;
     }
-    public void addCard(Card card){
-        // TODO: check if adding this card will exceed valueLimit
+    public boolean addCard(Card card){
+        // need to change return type of card class
+        int potentialTotal = getTotalValue() + card.getValue();
+
+        if (potentialTotal > valueLimit) {
+            return false;
+        }
 
         hand[numCards] = card;
-        numCards ++;
+        numCards++;
+        return true;
+
     }
     public int getNumCards(){
         return this.numCards;
@@ -32,8 +42,7 @@ public class CardHand {
         }
         return hand[index];
     }
-    private boolean bustCheck(Card[] hand){
-        // TODO: loop through player hand if exceeds 21 then return true;
-        return false;
+    public boolean bustCheck() {
+        return getTotalValue() > valueLimit;
     }
 }
