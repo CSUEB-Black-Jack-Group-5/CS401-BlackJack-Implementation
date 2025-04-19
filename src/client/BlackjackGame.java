@@ -1,3 +1,7 @@
+package client;
+
+import client.gui.BlackjackIntroGUI;
+
 /// Main class
 public class BlackjackGame {
     public static void main(String[] args) {

@@ -1,4 +1,4 @@
-
+package client.gui;
 ///  Black Jack Intro Panel
 
 import javax.swing.*;
@@ -98,7 +98,7 @@ public class BlackjackPanel extends JPanel {
         g2.setColor(Color.WHITE);
         g2.drawString("All in if you still have chance", 250, 200);
 
-        /// Card suits as decoration
+        /// game.Card suits as decoration
         SuitRenderer.drawCardSuit(g2, 180, 150, "♠", Color.BLACK);
         SuitRenderer.drawCardSuit(g2, 620, 150, "♥", Color.RED);
         SuitRenderer.drawCardSuit(g2, 160, 130, "♣", Color.BLACK);

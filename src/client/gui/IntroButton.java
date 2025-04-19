@@ -1,4 +1,4 @@
-/// Custom button class
+package client.gui; /// Custom button class
 
 import javax.swing.*;
 import java.awt.*;

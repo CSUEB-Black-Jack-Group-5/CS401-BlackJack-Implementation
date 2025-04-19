@@ -1,3 +1,5 @@
+package game;
+
 public class Shoe {
     private Card[] extendedDeck;
     private int numCards;

@@ -1,3 +1,8 @@
+package client;
+
+import client.gui.LoginGUI;
+import networking.Message;
+
 public class ClientMain {
     static LoginGUI loginGUI;
     static ClientWithHooks client;
@@ -5,7 +10,7 @@ public class ClientMain {
 
     public static void main(String[] args) {
         /*
-            LoginGUI will send the server a message indicating a login request
+            client.gui.LoginGUI will send the server a message indicating a login request
             The server will send a message back indicating what type of user logged in
                - This case is handled below
          */

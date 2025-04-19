@@ -1,3 +1,5 @@
+package networking;
+
 import java.io.Serializable;
 
 public class Message implements Serializable {
@@ -6,7 +8,7 @@ public class Message implements Serializable {
             private String username;
             private String password;
 
-            public Request (String username, String password) {
+            public Request(String username, String password) {
                 this.username = username;
                 this.password = password;
             }

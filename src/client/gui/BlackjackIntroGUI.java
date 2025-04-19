@@ -1,3 +1,5 @@
+package client.gui;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
@@ -5,7 +7,7 @@ import java.util.List;
 import java.util.Random;
 
 public class BlackjackIntroGUI extends Component {
-    /// Card animation components
+    /// game.Card animation components
     private Timer cardAnimationTimer;
     private List<CardAnimate> animatedCards = new ArrayList<>();
     private Random random = new Random();
