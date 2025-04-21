@@ -13,14 +13,41 @@ public class CardHand {
 
     public int getTotalValue(){
         int total = 0;
-        // TODO: get card total
+        int ace = 0;
+        for(int i = 0; i < numCards; i++){
+            // by default ace value holds 1
+            total += hand[i].getValue().getValue();
+            if(hand[i].getValue().hasAlternate()){
+                ace++;
+            }
+
+        }
+        // use alt. values for aces when possible
+        for(int i = 0; i < ace; i++){
+            // since we count ace as 1 first we set the aceVal to 10
+            int aceVal = Value.ACE.getAlternate() - Value.ACE.getValue();
+            if(total + aceVal <= valueLimit){
+                total += aceVal;
+            }
+            else{
+                // over 21 stop calculating aces
+                break;
+            }
+        }
         return total;
     }
-    public void addCard(Card card){
-        // TODO: check if adding this card will exceed valueLimit
-
+    public boolean addCard(Card card){
         hand[numCards] = card;
-        numCards ++;
+        numCards++;
+
+        if (getTotalValue() > valueLimit) {
+            // remove card if it would bust
+            numCards--;
+            return false;
+        }
+
+        return true;
+
     }
     public int getNumCards(){
         return this.numCards;
@@ -32,8 +59,7 @@ public class CardHand {
         }
         return hand[index];
     }
-    private boolean bustCheck(Card[] hand){
-        // TODO: loop through player hand if exceeds 21 then return true;
-        return false;
+    public boolean bustCheck() {
+        return getTotalValue() > valueLimit;
     }
 }
