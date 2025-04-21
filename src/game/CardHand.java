@@ -13,22 +13,39 @@ public class CardHand {
 
     public int getTotalValue(){
         int total = 0;
+        int ace = 0;
         for(int i = 0; i < numCards; i++){
-            // need to change return type of card class
-            total += hand[i].getValue();
+            // by default ace value holds 1
+            total += hand[i].getValue().getValue();
+            if(hand[i].getValue().hasAlternate()){
+                ace++;
+            }
+
+        }
+        // use alt. values for aces when possible
+        for(int i = 0; i < ace; i++){
+            // since we count ace as 1 first we set the aceVal to 10
+            int aceVal = Value.ACE.getAlternate() - Value.ACE.getValue();
+            if(total + aceVal <= valueLimit){
+                total += aceVal;
+            }
+            else{
+                // over 21 stop calculating aces
+                break;
+            }
         }
         return total;
     }
     public boolean addCard(Card card){
-        // need to change return type of card class
-        int potentialTotal = getTotalValue() + card.getValue();
+        hand[numCards] = card;
+        numCards++;
 
-        if (potentialTotal > valueLimit) {
+        if (getTotalValue() > valueLimit) {
+            // remove card if it would bust
+            numCards--;
             return false;
         }
 
-        hand[numCards] = card;
-        numCards++;
         return true;
 
     }
