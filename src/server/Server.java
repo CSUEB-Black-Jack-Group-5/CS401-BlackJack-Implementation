@@ -1,5 +1,6 @@
 package server;
 
+import game.AccountType;
 import networking.Message;
 
 import java.io.IOException;
@@ -7,18 +8,19 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Arrays;
 
 public class Server {
     // Client threads
     private final ClientThreadWithHooks[] connectedClients;
     private int connectClientsSize;
-    // private final ClientThread[] clientsInLobby;
-    // private int clientsInLobbySize;
+    private final ClientThreadWithHooks[] clientsInLobby;
+    private int clientsInLobbySize;
 
     private Thread connectionThread;
 
-    // private TableThread[] tables;
-    // private int tablesSize;
+    private final TableThread[] tables;
+    private int tablesSize;
 
     // private Database db;
 
@@ -38,8 +40,10 @@ public class Server {
         Socket socket;
         ObjectInputStream reader;
         ObjectOutputStream writer;
-        public ClientLoginHandler(Socket socket) {
+        Server serverRef;
+        public ClientLoginHandler(Socket socket, Server serverRef) {
             this.socket = socket;
+            this.serverRef = serverRef;
             try {
                 reader = new ObjectInputStream(socket.getInputStream());
                 writer = new ObjectOutputStream(socket.getOutputStream());
@@ -54,18 +58,22 @@ public class Server {
             try {
                 Message message;
                 while ((message = (Message) reader.readObject()) != null) {
+                    System.out.println(message.getClass());
                     if (message instanceof Message.CreateAccount.Request createAccountRequest) {
                         String username = createAccountRequest.getUsername();
                         String password = createAccountRequest.getPassword();
+                        System.out.println("Create Account: " + username + ", " + password);
 
-                        if (db.checkUserExists(username)) {
-                            System.err.println("User exists with username: " + username);
-                            writer.writeObject(new Message.CreateAccount.Response(/* fail status */));
-                        }
-                        else {
-                            db.registerNewUser(username, password);
-                            writer.writeObject(new Message.CreateAccount.Response(/* success status */));
-                        }
+                        // TODO: implement later
+                        // if (db.checkUserExists(username)) {
+                        //     System.err.println("User exists with username: " + username);
+                        //     writer.writeObject(new Message.CreateAccount.Response(/* fail status */));
+                        // }
+                        // else {
+                        //     db.registerNewUser(username, password);
+                        //     db.save();
+                        //     writer.writeObject(new Message.CreateAccount.Response(/* success status */));
+                        // }
                     }
                     // Login
                     // ========================================================
@@ -73,22 +81,18 @@ public class Server {
                         String username = loginRequest.getUsername();
                         String password = loginRequest.getPassword();
 
-                        if (!checkCredentials(username, password)) writer.writeObject(Message.Login.Response(/* fail status */));
-                        ClientThreadWithHooks clientThread = switch (loginRequest.getUserType()) {
-                            case UserType.PLAYER -> new PlayerClientThread(clientSocket, this);
-                            case UserType.DEALER -> new DealerClientThread(clientSocket, this);
+                        // TODO: if (!checkCredentials(username, password))
+                        //          writer.writeObject(Message.Login.Response(/* fail status */));
+                        // TODO: AccountType accountType = serverRef.db.getUserTypeFor(username);
+                        AccountType accountType = AccountType.Player;
+                        ClientThreadWithHooks clientThread = switch (accountType) {
+                            case AccountType.Player -> new PlayerClientThread(socket, serverRef, writer, reader);
+                            case AccountType.Dealer -> new DealerClientThread(socket, serverRef, writer, reader);
                         };
-                        writer.writeObject(new Message.Login.Response(/* status */));
-
-                        // Set up the client thread message hooks
-                        clientThread.addMessageHook(Message.Hit.Request.class, (response) -> {
-                        });
-                        clientThread.addMessageHook(Message.Stand.Request.class, (response) -> {
-                        });
-                        clientThread.addMessageHook(Message.Leave.Request.class, (response) -> {
-                        });
-                        connectedClients[connectClientsSize] = clientThread;
-                        new Thread(clientThread);
+                        writer.writeObject(new Message.Login.Response(true, accountType));
+                        connectedClients[connectClientsSize++] = clientThread;
+                        clientsInLobby[clientsInLobbySize++] = clientThread;
+                        new Thread(clientThread).start();
                         break; // Stop thread here
                     }
                 }
@@ -115,67 +119,10 @@ public class Server {
 
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                ObjectInputStream reader = new ObjectInputStream(clientSocket.getInputStream());
-                ObjectOutputStream writer = new ObjectOutputStream(clientSocket.getOutputStream());
-                synchronized (connectedClients) {
-                    Message message;
-
-                    // This won't quite work for a fully multithreaded server as it will block the main thread waiting for a single
-                    //      client to complete the login process. We need to spawn a new temporary thread for handling the client login process
-                    while ((message = (Message) reader.readObject()) != null) {
-                        // Handle the account create request from the newly connected client
-                        //      Client has just opened in this scenario and prompts for login/create account
-                        //      Client has not yet moved onto the lobby window
-                        //      There are two possible messages we can get here CreateAccount, and Login
-                        //          - Dealers will only trigger Login
-                        //          - Clients might trigger CreateAccount and will always trigger Login
-
-                        // Create Account
-                        // ========================================================
-                        if (message instanceof Message.CreateAccount.Request createAccountRequest) {
-                            String username = createAccountRequest.getUsername();
-                            String password = createAccountRequest.getPassword();
-
-                            if (db.checkUserExists(username)) {
-                                System.err.println("User exists with username: " + username);
-                                writer.writeObject(new Message.CreateAccount.Response(/* fail status */));
-                            }
-                            else {
-                                db.registerNewUser(username, password);
-                                writer.writeObject(new Message.CreateAccount.Response(/* success status */));
-                            }
-                        }
-                        // Login
-                        // ========================================================
-                        if (message instanceof Message.Login.Request loginRequest) {
-                            String username = loginRequest.getUsername();
-                            String password = loginRequest.getPassword();
-                            // server.Server determines whether player or dealer
-
-                            if (!checkCredentials(username, password)) writer.writeObject(Message.Login.Response(/* fail status */));
-
-                            UserType t = getUserType(username);
-
-                            writer.writeObject(new Message.Login.Response(/* status */));
-                            ClientThread clientThread = new ClientThread(t, clientSocket, this);
-
-                            // Set up the client thread message hooks
-                            clientThread.addMessageHook(Message.Hit.Request.class, (response) -> {
-                            });
-                            clientThread.addMessageHook(Message.Stand.Request.class, (response) -> {
-                            });
-                            clientThread.addMessageHook(Message.Leave.Request.class, (response) -> {
-                            });
-                            connectedClients[connectClientsSize] = clientThread;
-                            new Thread(clientThread);
-                        }
-                    }
-                }
+                new Thread(new ClientLoginHandler(clientSocket, this)).start();
             }
         } catch (IOException e) {
             System.err.println("Failed to read socket");
-        } catch (ClassNotFoundException e) {
-            System.err.println("Failed to read socket object class type");
         }
     }
 
@@ -184,6 +131,11 @@ public class Server {
         this.running = true;
         connectedClients = new ClientThreadWithHooks[10]; // default to 10 elements
         connectClientsSize = 0;
+        clientsInLobby = new ClientThreadWithHooks[10];
+        clientsInLobbySize = 0;
+
+        tables = new TableThread[10];
+        tablesSize = 0;
     }
     public void startServer() {
         connectionThread = new Thread(this::connectionHandler);
@@ -201,4 +153,50 @@ public class Server {
         }
     }
     public void disconnectServer() {}
+
+    public TableThread[] getTables() {
+        return tables;
+    }
+    public ClientThreadWithHooks[] getDealersInLobby() {
+        return (ClientThreadWithHooks[]) Arrays.stream(clientsInLobby)
+                .filter(clientThreadWithHooks -> clientThreadWithHooks instanceof DealerClientThread)
+                .toArray();
+    }
+    public ClientThreadWithHooks[] getPlayersInLobby() {
+        return (ClientThreadWithHooks[]) Arrays.stream(clientsInLobby)
+                .filter(clientThreadWithHooks -> clientThreadWithHooks instanceof PlayerClientThread)
+                .toArray();
+    }
+    // public Table getTableById(int tableId) {
+    //     List<Table> filteredTables = Arrays.stream(tables).filter(tableThread -> tableThread.table.getTableId() == tableId).toList();
+    //     if (filteredTables.size() == 0) return null;
+    //     return filteredTables.get(0);
+    // }
+    // public boolean hitPlayer(PlayerClientThread clientThread, int tableId) {
+    //     if (tableId < 0 || tableId >= tablesSize) {
+    //         System.err.println("tableId = " + tableId + " doesn't exist");
+    //         return false;
+    //     }
+    //     tables[tableId].hitPlayer(clientThread);
+
+    //     return true;
+    // }
+    public boolean movePlayerClientToTable(PlayerClientThread clientThread, int tableId) {
+        if (tableId < 0 || tableId >= tablesSize) {
+            System.err.println("tableId = " + tableId + " doesn't exist");
+            return false;
+        }
+        tables[tableId].addClientToTable(clientThread);
+        return true;
+    }
+    public void spawnTable() {
+        TableThread tableThread = new TableThread();
+        tables[tablesSize++] = tableThread;
+        new Thread(tableThread).start();
+    }
+    public void broadcastNetworkMessageToTable(Message message) {
+        for (ClientThreadWithHooks client : connectedClients) {
+            client.sendNetworkMessage(message);
+        }
+    }
 }
