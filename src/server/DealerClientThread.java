@@ -14,16 +14,16 @@ public class DealerClientThread extends ClientThreadWithHooks {
         /**
          * This is where the server game logic for the dealer happens
          */
-        addMessageHook(Message.CreateTable.Request.class, (req) -> {
-            System.out.println("CreateTable Request");
-            serverRef.spawnTable();
-            sendNetworkMessage(new Message.CreateTable.Response()); //TODO: Be more thoughtful about errors
-            serverRef.broadcastNetworkMessage(new Message.LobbyData.Response());
-        });
-        addMessageHook(Message.Deal.Request.class, (req) -> {
-            System.out.println("Deal Request");
-            sendNetworkMessage(new Message.Deal.Response());
-        });
+        // addMessageHook(Message.CreateTable.Request.class, (req) -> {
+        //     System.out.println("CreateTable Request");
+        //     serverRef.spawnTable();
+        //     sendNetworkMessage(new Message.CreateTable.Response()); //TODO: Be more thoughtful about errors
+        //     serverRef.broadcastNetworkMessage(new Message.LobbyData.Response());
+        // });
+        // addMessageHook(Message.Deal.Request.class, (req) -> {
+        //     System.out.println("Deal Request");
+        //     sendNetworkMessage(new Message.Deal.Response());
+        // });
         addMessageHook(Message.Stand.Request.class, (req) -> {
             System.out.println("Stand Request");
             sendNetworkMessage(new Message.Stand.Response());
