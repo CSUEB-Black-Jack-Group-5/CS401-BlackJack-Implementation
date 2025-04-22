@@ -12,27 +12,26 @@ import java.util.function.Consumer;
 public class ClientThreadWithHooks implements Runnable {
     private HashMap<Class<? extends Message>, Consumer<? super Message>> messageHooks;
     private volatile boolean running;
+    private static int clientThreadIdCount = 0;
 
+    private int clientThreadId;
     String currentlyJoinedRoom;
     String username;
+    TableThread activeTable;
 
     Socket socket;
     ObjectOutputStream writer = null;
     ObjectInputStream reader = null;
 
-    public ClientThreadWithHooks(Socket socket) {
+    public ClientThreadWithHooks(Socket socket, ObjectOutputStream writer, ObjectInputStream reader) {
         this.socket = socket;
         this.running = true;
         this.messageHooks = new HashMap<>();
+        this.activeTable = null;
+        this.writer = writer;
+        this.reader = reader;
         this.username = "unpopulated";
-
-        try {
-            writer = new ObjectOutputStream(socket.getOutputStream());
-            writer.flush();
-            reader = new ObjectInputStream(socket.getInputStream());
-        } catch (IOException e) {
-            System.err.println("Failed to initialize writer/reader");
-        }
+        this.clientThreadId = ClientThreadWithHooks.clientThreadIdCount++;
     }
 
     @Override
@@ -46,6 +45,7 @@ public class ClientThreadWithHooks implements Runnable {
                     }
                     else {
                         System.err.println("No hook for message: " + message.getClass());
+                        Thread.dumpStack();
                     }
                 }
             } catch (IOException e) {
@@ -73,6 +73,18 @@ public class ClientThreadWithHooks implements Runnable {
         });
     }
 
+    public void sendNetworkMessage(Message message) {
+        try {
+            this.writer.writeObject(message);
+        } catch (IOException e) {
+            System.err.println("Failed to write message");
+        }
+    }
+
+    public int getClientThreadId() {
+        return clientThreadId;
+    }
+
     public void shutdown() {
         this.running = false;
         try {
@@ -82,11 +94,7 @@ public class ClientThreadWithHooks implements Runnable {
         }
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getUsername() {
-        return username;
+    public void setActiveTable(TableThread activeTable) {
+        this.activeTable = activeTable;
     }
 }
