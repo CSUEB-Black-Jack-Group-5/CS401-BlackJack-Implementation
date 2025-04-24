@@ -24,7 +24,7 @@ public class Message implements Serializable {
         }
         public static class Response extends Message {
             private boolean status;
-            private AccountType type;       // this doesn't exist yet
+            private AccountType type;
 
             public Response(boolean status, AccountType type) {
                 this.status = status;
@@ -71,6 +71,37 @@ public class Message implements Serializable {
             }
         }
     }
+    /* Join Table Method */     // not properly UMLed yet; this is my attempt at implementation
+    public static class JoinTable {
+        public static class Request extends Message {
+            private int userId;
+            private int tableId;
+
+            public Request(int userId, int tableId) {
+                this.userId = userId;
+                this.tableId = tableId;
+            }
+
+            public int getUserId() {
+                return userId;
+            }
+
+            public int getTableId() {
+                return tableId;
+            }
+        }
+        public static class Response extends Message {
+            private boolean status;
+
+            public Response(boolean status) {
+                this.status = status;
+            }
+
+            public boolean getStatus() {
+                return status;
+            }
+        }
+    }
     /* Create Table Method */
     public static class CreateTable {
         public static class Request extends Message {
@@ -102,20 +133,160 @@ public class Message implements Serializable {
             }
         }
     }
-    /* Hit Method */    // not properly UMLed yet
+    /* Hit Method */            // not properly UMLed yet; this is my attempt at implementation
     public static class Hit {
-        public static class Request extends Message {}
-        public static class Response extends Message {}
+        public static class Request extends Message {
+            private int playerId;
+            private Shoe deck;
+
+            public Request(int playerId, Shoe deck) {
+                this.playerId = playerId;
+                this.deck = deck;
+            }
+
+            public int getPlayerId() {
+                return playerId;
+            }
+
+            public Shoe getDeck() {
+                return deck;
+            }
+        }
+        public static class Response extends Message {
+            private Card draw;
+            private CardHand hand;
+            private boolean status;
+
+            public Response(Card draw, CardHand hand, boolean status) {
+                this.draw = draw;
+                this.hand = hand;
+                this.status = status;
+            }
+
+            public Card getDraw() {
+                return draw;
+            }
+
+            public CardHand getHand() {
+                return hand;
+            }
+
+            public boolean getStatus() {
+                return status;
+            }
+        }
     }
-    /* Stand Method */  // not properly UMLed yet
+    /* Stand Method */          // not properly UMLed yet; this is my attempt at implementation
     public static class Stand {
-        public static class Request extends Message {}
-        public static class Response extends Message {}
+        public static class Request extends Message {
+            private int playerId;
+
+            public Request(int playerId) {
+                this.playerId = playerId;
+            }
+
+            public int getPlayerId() {
+                return playerId;
+            }
+        }
+        public static class Response extends Message {
+            // unsure if the hand is necessary for stand, but i implemented it just in case
+            private CardHand hand;
+            private boolean status;
+
+            public Response(CardHand hand, boolean status) {
+                this.hand = hand;
+                this.status = status;
+            }
+
+            public CardHand getHand() {
+                return hand;
+            }
+
+            public boolean getStatus() {
+                return status;
+            }
+        }
     }
-    /* Leave Method */  // not properly UMLed yet
-    public static class Leave {
-        public static class Request extends Message {}
-        public static class Response extends Message {}
+    /* Split Method */          // not properly UMLed yet; this is my attempt at implementation
+    public static class Split {
+        public static class Request extends Message {
+            private int playerId;
+            private cardHand hand;
+
+            public Request(int playerId, cardHand hand) {
+                this.playerId = playerId;
+                this.hand = hand;
+            }
+
+            public int getPlayerId() {
+                return playerId;
+            }
+
+            public cardHand getHand() {
+                return hand;
+            }
+        }
+        public static class Response extends Message {
+            private CardHand hand;
+            private CardHand splitHand;
+            private boolean status;
+
+            public Response(CardHand hand, CardHand splitHand, boolean status) {
+                this.hand = hand;
+                this.splitHand = splitHand;
+                this.status = status;
+            }
+
+            public CardHand getHand() {
+                return hand;
+            }
+
+            public CardHand getSplitHand() {
+                return splitHand;
+            }
+
+            public boolean getStatus() {
+                return status;
+            }
+        }
+    }
+    /* Double Down Method */    // not properly UMLed yet; this is my attempt at implementation
+    public static class DoubleDown {
+        public static class Request extends Message {
+            private int playerId;
+            private int wager;
+
+            public Request(int playerId, int wager) {
+                this.playerId = playerId;
+                this.wager = wager;
+            }
+
+            public int getPlayerId() {
+                return playerId;
+            }
+
+            public int getWager() {
+                return wager;
+            }
+        }
+        public static class Response extends Message {
+            private int wager;
+            private boolean status;
+
+            public Response(int wager, boolean status) {
+                this.wager = wager;
+                this.status = status;
+            }
+
+            public int getWager() {
+                return wager;
+            }
+
+            public boolean getStatus() {
+                return status;
+            }
+        }
     }
     /* Lobby Data Method */
     public static class LobbyData {
@@ -160,10 +331,42 @@ public class Message implements Serializable {
             }
         }
     }
-    /* Table Data Method */
+    /* Table Data Method */     // not properly UMLed yet; this is my attempt at implementation
     public static class TableData {
-        public static class Request extends Message {}
-        public static class Response extends Message {}
+        public static class Request extends Message {
+            private int dealerId;       // unsure who's requesting the table data?
+
+            public Request(int dealerId) {
+                this.dealerId = dealerId;
+            }
+
+            public int getDealerId() {
+                return dealerId;
+            }
+        }
+        public static class Response extends Message {
+            private int dealerId;
+            private int[] playerIds;
+            private int playersJoined;
+
+            public Response(int dealerId, int[] playerIds, int playersJoined) {
+                this.dealerId = dealerId;
+                this.playerIds = playerIds;
+                this.playersJoined = playersJoined;
+            }
+
+            public int getDealerId() {
+                return dealerId;
+            }
+
+            public int[] getPlayerIds() {
+                return playerIds;
+            }
+
+            public int getPlayersJoined() {
+                return playersJoined;
+            }
+        }
     }
     /* Game Data Method */
     public static class GameData {
