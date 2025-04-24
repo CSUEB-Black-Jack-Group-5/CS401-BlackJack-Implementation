@@ -212,9 +212,9 @@ public class Message implements Serializable {
     public static class Split {
         public static class Request extends Message {
             private int playerId;
-            private cardHand hand;
+            private CardHand hand;
 
-            public Request(int playerId, cardHand hand) {
+            public Request(int playerId, CardHand hand) {
                 this.playerId = playerId;
                 this.hand = hand;
             }
@@ -223,7 +223,7 @@ public class Message implements Serializable {
                 return playerId;
             }
 
-            public cardHand getHand() {
+            public CardHand getHand() {
                 return hand;
             }
         }
