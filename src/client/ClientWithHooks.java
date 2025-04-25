@@ -15,9 +15,6 @@ public class ClientWithHooks {
     private String ip;
     private int port;
 
-    private String username;
-    private String activeRoom;
-    private boolean switchingRooms;
     private boolean running;
     private boolean loggedIn;
 
@@ -32,18 +29,16 @@ public class ClientWithHooks {
     private final HashMap<Class<? extends Message>, Consumer<? super Message>> messageHooks;
 
     public ClientWithHooks(String ip, int port) {
-        this.activeRoom = "";
-        this.username = "";
         this.ip = ip;
         this.port = port;
-        this.switchingRooms = true;
         this.running = true;
         this.responseProcessed = false;
         this.messageHooks = new HashMap<>();
         try {
             this.socket = new Socket(this.ip, this.port);
-            this.objectReader = new ObjectInputStream(this.socket.getInputStream());
+            // NOTE: this order of construction matters OutputStream first, then InputStream
             this.objectWriter = new ObjectOutputStream(this.socket.getOutputStream());
+            this.objectReader = new ObjectInputStream(this.socket.getInputStream());
         } catch (IOException e) {
             System.err.println("Failed to connect to " + this.ip + ":" + this.port);
             System.err.println("Is the server running?");
