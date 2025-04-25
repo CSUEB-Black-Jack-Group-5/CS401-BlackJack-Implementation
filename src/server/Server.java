@@ -45,8 +45,8 @@ public class Server {
             this.socket = socket;
             this.serverRef = serverRef;
             try {
-                reader = new ObjectInputStream(socket.getInputStream());
                 writer = new ObjectOutputStream(socket.getOutputStream());
+                reader = new ObjectInputStream(socket.getInputStream());
             } catch (IOException e) {
                 System.err.println("Failed to get socket streams");
                 throw new RuntimeException(e);
