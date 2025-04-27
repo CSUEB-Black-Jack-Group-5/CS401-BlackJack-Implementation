@@ -29,6 +29,12 @@ public class Player {
         wallet.removeFunds(-amount);
     }
 
+    public boolean split() {
+        if (!hand.checkSplit()) return false;
+        splitHand.addCard(this.hand.getAndRemoveSplitCard());
+        return true;
+    }
+
     public void doubleDown() {
         wallet.removeFunds(-wager);
         wager *= 2;

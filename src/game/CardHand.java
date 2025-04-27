@@ -10,6 +10,15 @@ public class CardHand {
         this.numCards = 0;
         this.hand = new Card[52];
     }
+    public boolean checkSplit() {
+        if (this.numCards != 2) return false;
+        return this.hand[0] == this.hand[1];
+    }
+    public Card getAndRemoveSplitCard() {
+        Card splitCard = this.hand[1];
+        numCards = 1;
+        return splitCard;
+    }
 
     public int getTotalValue(){
         int total = 0;
