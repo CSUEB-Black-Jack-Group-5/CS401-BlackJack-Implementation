@@ -49,10 +49,18 @@ public class Player {
     public boolean split() {
         if (hand.getNumCards() == 2 &&
                 hand.getCard(0).getValue().getValue() == hand.getCard(1).getValue().getValue()) {
-            splitHand = new CardHand(21);
-            splitHand.addCard(hand.getCard(1));
+
+            // Store original two cards first
+            Card firstCard = hand.getCard(0);
+            Card secondCard = hand.getCard(1);
+
+            // Create two new hands
             hand = new CardHand(21);
-            hand.addCard(hand.getCard(0));
+            hand.addCard(firstCard);
+
+            splitHand = new CardHand(21);
+            splitHand.addCard(secondCard);
+
             activeHandRef = hand;
             return true;
         }
