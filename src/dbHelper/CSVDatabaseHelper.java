@@ -1,4 +1,4 @@
-package db;
+package dbHelper;
 
 import java.util.Scanner;
 import java.io.*;
@@ -7,7 +7,7 @@ import java.util.UUID;
 public class CSVDatabaseHelper {
 
 
-    private static final String playerFile = System.getProperty("user.dir") + "/src/db/allPlayers/allPlayers.csv";
+    private static final String playerFile = System.getProperty("user.dir") + "/res/db/allPlayers/allPlayers.csv";
 
     // Synchronized method to add player to our "db"
     public synchronized static boolean addPlayer(String username, String password) {
@@ -32,7 +32,7 @@ public class CSVDatabaseHelper {
     }
 
     public static boolean playerExists(String username) {
-        File file = new File(System.getProperty("user.dir") + "/src/db/allPlayers/allPlayers.csv");
+        File file = new File(System.getProperty("user.dir") + "/res/db/allPlayers/allPlayers.csv");
 
         try (Scanner scanner = new Scanner(file)) {
             while (scanner.hasNextLine()) {
@@ -51,7 +51,7 @@ public class CSVDatabaseHelper {
         return false;
     }
     public static boolean dealerExists(String dealerName) {
-        File file = new File(System.getProperty("user.dir") + "/src/db/allDealers.csv");
+        File file = new File(System.getProperty("user.dir") + "/res/db/allDealers.csv");
         try (Scanner scanner = new Scanner(file)){
             while(scanner.hasNextLine()) {
                 String line = scanner.nextLine();
@@ -72,7 +72,7 @@ public class CSVDatabaseHelper {
     // creates a new dir for each new player created to keep track of their data
     public static void createPlayerFiles(String userName) {
 
-        File userDir = new File(System.getProperty("user.dir") + "/src/db/Players/" + userName);
+        File userDir = new File(System.getProperty("user.dir") + "/res/db/Players/" + userName);
         if (!userDir.exists()) {
             userDir.mkdirs();
         }
