@@ -4,6 +4,7 @@ import java.io.Serializable;
 import game.Card;
 import game.CardHand;
 import game.Shoe;
+import game.Table;
 
 public class Message implements Serializable {
     /* Login Method */
