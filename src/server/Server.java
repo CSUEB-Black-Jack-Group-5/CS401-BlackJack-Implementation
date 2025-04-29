@@ -1,6 +1,6 @@
 package server;
 
-import game.AccountType;
+import networking.AccountType;
 import networking.Message;
 
 import java.io.IOException;

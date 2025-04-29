@@ -1,7 +1,7 @@
 package client.test_gui;
 
 import client.ClientWithHooks;
-import game.AccountType;
+import networking.AccountType;
 import networking.Message;
 
 public class TestGuiMain {
