@@ -140,16 +140,10 @@ public class Message implements Serializable {
     /* Deal Method */
     public static class Deal {
         public static class Request extends Message {
-            private int playerId; // who are we dealing to
             private int tableId; // what table is this from
 
-            public Request(int playerId, int tableId) {
-                this.playerId = playerId;
+            public Request(int tableId) {
                 this.tableId = tableId;
-            }
-
-            public int getPlayerId() {
-                return playerId;
             }
 
             public int getTableId() {
