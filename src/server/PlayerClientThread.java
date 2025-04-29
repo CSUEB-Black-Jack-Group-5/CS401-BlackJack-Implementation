@@ -117,6 +117,25 @@ public class PlayerClientThread extends ClientThreadWithHooks {
             int dummyPlayersJoined = 4;
             sendNetworkMessage(new Message.TableData.Response(dummyDealerID,dummyPlayerIDs,dummyPlayersJoined));
         });
+        addMessageHook(Message.Split.Request.class, (req)->{
+            System.out.println("Split request");
+
+            //-------------NOTE------------------
+            // dummy vals to compile
+            CardHand dummyCardHand = new CardHand(21);
+            CardHand dummyCardHand2 = new CardHand(21);
+            boolean dummyStatus = true;
+            sendNetworkMessage(new Message.Split.Response(dummyCardHand,dummyCardHand2,dummyStatus));
+        });
+        addMessageHook(Message.DoubleDown.Request.class, (req)->{
+            System.out.println("Double Down request");
+
+            //-------------NOTE------------------
+            // dummy vals to compile
+            int dummyWager = 100;
+            boolean dummyStatus = true;
+            sendNetworkMessage(new Message.DoubleDown.Response(dummyWager,dummyStatus));
+        });
         showMessageHooks();
     }
 }
