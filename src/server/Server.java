@@ -84,10 +84,10 @@ public class Server {
                         // TODO: if (!checkCredentials(username, password))
                         //          writer.writeObject(Message.Login.Response(/* fail status */));
                         // TODO: AccountType accountType = serverRef.db.getUserTypeFor(username);
-                        AccountType accountType = AccountType.Player;
+                        AccountType accountType = AccountType.PLAYER;
                         ClientThreadWithHooks clientThread = switch (accountType) {
-                            case AccountType.Player -> new PlayerClientThread(socket, serverRef, writer, reader);
-                            case AccountType.Dealer -> new DealerClientThread(socket, serverRef, writer, reader);
+                            case AccountType.PLAYER -> new PlayerClientThread(socket, serverRef, writer, reader);
+                            case AccountType.DEALER -> new DealerClientThread(socket, serverRef, writer, reader);
                         };
                         writer.writeObject(new Message.Login.Response(true, accountType));
                         connectedClients[connectClientsSize++] = clientThread;
