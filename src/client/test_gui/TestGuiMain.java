@@ -14,13 +14,14 @@ public class TestGuiMain {
         client.addMessageHook(Message.CreateAccount.Response.class, (response) -> {});
         client.addMessageHook(Message.Login.Response.class, (response) -> {
             switch (response.getType()) {
-                case AccountType.Dealer: {
+                case AccountType.DEALER: {
                     client.addMessageHook(Message.CreateTable.Response.class, (res2) -> {
                         System.out.println("CreateTable Response");
                     });
-                    client.addMessageHook(Message.Deal.Response.class, (res2) -> {
-                        System.out.println("Deal Response");
-                    });
+                    // TODO: Make a deal message class
+                    // client.addMessageHook(Message.Deal.Response.class, (res2) -> {
+                    //     System.out.println("Deal Response");
+                    // });
                     client.addMessageHook(Message.Stand.Response.class, (res2) -> {
                         System.out.println("Stand Response");
                     });
@@ -39,7 +40,7 @@ public class TestGuiMain {
                     testGui.showDealer();
                 }
                 break;
-                case AccountType.Player: {
+                case AccountType.PLAYER: {
                     client.addMessageHook(Message.JoinTable.Response.class, (req) -> {
                         System.out.println("JoinTable Response");
                     });
