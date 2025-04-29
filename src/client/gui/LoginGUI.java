@@ -1,6 +1,8 @@
 package client.gui;
 ///  Login GUI
 
+import networking.Message;
+import game.AccountType;
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
@@ -219,7 +221,7 @@ public class LoginGUI extends JDialog {
         ///  I think we need database to use for username and password
         ///  At this i'll set the password is "something you want"
         ///  And username gonna be "Group 5 - BlackJack"
-        return  username.equals("Group5") && password.equals("something you want");
+        Message.Login.Request loginRequest = new Message.Login.Request(username, password);
     }
 
     public String getUsername() {

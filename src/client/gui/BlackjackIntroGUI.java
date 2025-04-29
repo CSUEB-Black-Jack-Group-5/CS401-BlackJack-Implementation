@@ -1,5 +1,7 @@
 package client.gui;
 
+import client.DealerLobbyGUI.DealerLobbyBlackJack;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
@@ -72,9 +74,11 @@ public class BlackjackIntroGUI extends Component {
 
         /// Login check popup window successful result
         if (loginGUI.isSucceeded()) {
-            JOptionPane.showMessageDialog(frame,
-                    "Welcome, " + loginGUI.getUsername() + "! Game is starting...",
-                    "Login Successful", JOptionPane.INFORMATION_MESSAGE);
+            frame.dispose();  // or frame.setVisible(false);
+
+            // Open the dealer lobby
+            DealerLobbyBlackJack dealerLobby = new DealerLobbyBlackJack();
+            dealerLobby.setVisible(true);
         }
     }
 }
