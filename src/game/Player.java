@@ -13,7 +13,7 @@ public class Player {
     private int wager;
     private Wallet wallet;
     private String username; // Username format: "basims21"
-    private String userId;    // UserId format: "u001"
+    private String userId;   // UserId format: "u001"
 
     public Player(String username, String userId) {
         this.playerId = ++idCount;
@@ -29,6 +29,10 @@ public class Player {
 
     public void setReady(boolean ready) {
         this.isReady = ready;
+    }
+
+    public boolean isReady() {
+        return isReady;
     }
 
     public void makeBet(float amount) {
@@ -99,7 +103,6 @@ public class Player {
             if (dealerHasBlackjack) {
                 wallet.addFunds(insuranceAmount * 3); // original insurance + 2x winnings
             }
-            // If no blackjack, insurance is lost (already deducted)
         }
     }
 
