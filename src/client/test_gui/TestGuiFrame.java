@@ -1,6 +1,7 @@
 package client.test_gui;
 
 import client.ClientWithHooks;
+import game.Shoe;
 import networking.Message;
 
 import javax.swing.*;
@@ -35,32 +36,43 @@ public class TestGuiFrame extends JFrame {
         playerPanel.setLayout(new BoxLayout(playerPanel, BoxLayout.Y_AXIS));
         playerPanel.add(new TestMessagePanel.Builder().setText("Join Table").setButtonListener((ctx) -> {
             System.out.println("Join Table");
-            client.sendNetworkMessage(new Message.JoinTable.Request());
+            int playerId = 0;
+            int tableId = 0;
+            client.sendNetworkMessage(new Message.JoinTable.Request(playerId, tableId));
         }).build());
         playerPanel.add(new TestMessagePanel.Builder().setText("Hit").setButtonListener((ctx) -> {
-            client.sendNetworkMessage(new Message.Hit.Request());
+            int playerId = 0;
+            Shoe shoe = new Shoe(1);
+            client.sendNetworkMessage(new Message.Hit.Request(playerId, shoe)); // NOTE: Hit.Request currerntly takes an unecessary Shoe in the constructor
         }).build());
         playerPanel.add(new TestMessagePanel.Builder().setText("Stand").setButtonListener((ctx) -> {
-            client.sendNetworkMessage(new Message.Stand.Request());
+            int playerId = 0;
+            client.sendNetworkMessage(new Message.Stand.Request(playerId));
         }).build());
         playerPanel.add(new TestMessagePanel.Builder().setText("Ready").setButtonListener((ctx) -> {
-            client.sendNetworkMessage(new Message.PlayerReady.Request());
+            String playerId = ""; // TODO: We need to decide whether playerId is a String or Integer (See line 51)
+            client.sendNetworkMessage(new Message.PlayerReady.Request(playerId));
         }).build());
         playerPanel.add(new TestMessagePanel.Builder().setText("PlayerLeave").setButtonListener((ctx) -> {
-            client.sendNetworkMessage(new Message.PlayerLeave.Request());
+            int playerId = 0; // TODO: We need to somehow tell the client what its id is for this request
+            int tableId = 0;  // TODO: We need to store the table the player is in
+            client.sendNetworkMessage(new Message.PlayerLeave.Request(playerId, tableId));
         }).build());
 
         dealerPanel = new JPanel();
         dealerPanel.setVisible(false);
         dealerPanel.setLayout(new BoxLayout(dealerPanel, BoxLayout.Y_AXIS));
         dealerPanel.add(new TestMessagePanel.Builder().setText("Create Table").setButtonListener((ctx) -> {
-            client.sendNetworkMessage(new Message.CreateTable.Request());
+            String dealerId = "";
+            client.sendNetworkMessage(new Message.CreateTable.Request(dealerId));
         }).build());
         dealerPanel.add(new TestMessagePanel.Builder().setText("Deal").setButtonListener((ctx) -> {
             client.sendNetworkMessage(new Message.Deal.Request());
         }).build());
         dealerPanel.add(new TestMessagePanel.Builder().setText("DealerLeave").setButtonListener((ctx) -> {
-            client.sendNetworkMessage(new Message.DealerLeave.Request());
+            int dealerId = 0;
+            int tableId = 0;
+            client.sendNetworkMessage(new Message.DealerLeave.Request(dealerId, tableId));
         }).build());
 
         panel.add(new TestMessagePanel.Builder().setText("Disconnect").setButtonListener((ctx) -> {
