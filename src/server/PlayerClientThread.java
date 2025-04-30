@@ -1,11 +1,16 @@
 package server;
 
+import game.CardHand;
+import game.Card;
+import game.Value;
+import game.Suit;
+import game.Table;
+
 import networking.Message;
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.Arrays;
 
 public class PlayerClientThread extends ClientThreadWithHooks {
     public PlayerClientThread(Socket socket, Server server, ObjectOutputStream writer, ObjectInputStream reader) {
@@ -27,20 +32,45 @@ public class PlayerClientThread extends ClientThreadWithHooks {
 
             // sendNetworkMessage(new Message.Hit.Response(table));
             // server.broadcastNetworkMessage(new Message.Hit.Response());
-            sendNetworkMessage(new Message.Hit.Response());
+
+            //-------------NOTE------------------
+            // dummy vals to compile
+            boolean dummyStatus = true;
+            Card dummyCard1 = new Card(Suit.DIAMONDS, Value.EIGHT);
+            Card dummyCard2 = new Card(Suit.CLUBS, Value.ACE);
+            CardHand dummyCardHand = new CardHand(21);
+
+            // just testing addCard in cardHand
+            dummyCardHand.addCard(dummyCard1);
+            dummyCardHand.addCard(dummyCard2);
+
+            sendNetworkMessage(new Message.Hit.Response(dummyCard1,dummyCardHand,dummyStatus));
         });
         addMessageHook(Message.Stand.Request.class, (req) -> {
             System.out.println("Stand Request");
-            sendNetworkMessage(new Message.Stand.Response());
+
+            //-------------NOTE------------------
+            // dummy vals to compile
+            boolean dummyStatus = true;
+            CardHand dummyCardHand = new CardHand(21);
+            sendNetworkMessage(new Message.Stand.Response(dummyCardHand,dummyStatus));
         });
         addMessageHook(Message.PlayerReady.Request.class, (req) -> {
             System.out.println("PlayerReady request");
-            sendNetworkMessage(new Message.PlayerReady.Response());
+
+            //-------------NOTE------------------
+            // dummy vals to compile
+            boolean dummyStatus = true;
+            sendNetworkMessage(new Message.PlayerReady.Response(dummyStatus));
         });
         addMessageHook(Message.PlayerLeave.Request.class, (req) -> {
             System.out.println("PlayerLeave request");
             // int tableId = req.getTableId();
-            sendNetworkMessage(new Message.PlayerLeave.Response());
+
+            //-------------NOTE------------------
+            // dummy vals to compile
+            boolean dummyStatus = true;
+            sendNetworkMessage(new Message.PlayerLeave.Response(dummyStatus));
         });
         addMessageHook(Message.LobbyData.Request.class, (req) -> {
             System.out.println("Lobby data request");
@@ -48,22 +78,63 @@ public class PlayerClientThread extends ClientThreadWithHooks {
             // final ClientThreadWithHooks[] dealers = server.getDealersInLobby();
             // final ClientThreadWithHooks[] players = server.getPlayersInLobby();
             // Message.LobbyData.Response response = new Message.LobbyData.Response(tables, dealers.length, players.length);
-            sendNetworkMessage(new Message.LobbyData.Response());
+
+
+            //-------------NOTE------------------
+            // dummy vals to compile
+            Table[] tables = new Table[1];
+            int dummyPlayerCount = 6;
+            int dummyDealerCount = 1;
+            sendNetworkMessage(new Message.LobbyData.Response(tables,dummyPlayerCount,dummyDealerCount));
         });
         addMessageHook(Message.GameData.Request.class, (req) -> {
             System.out.println("GameData request");
-            sendNetworkMessage(new Message.GameData.Response());
+
+            //-------------NOTE------------------
+            // dummy vals to compile
+            CardHand dummyCardHand = new CardHand(21);
+            CardHand dummyDealerHand = new CardHand(21);
+            sendNetworkMessage(new Message.GameData.Response(dummyCardHand,dummyDealerHand));
         });
         addMessageHook(Message.ClockSync.Request.class, (req) -> {
             System.out.println("ClockSync request");
             // float timer = server.getTableById(req.getTableId()).getTimer();
             // sendNetworkMessage(new Message.ClockSync.Response(timer));
-            sendNetworkMessage(new Message.ClockSync.Response());
+
+            //-------------NOTE------------------
+            // dummy vals to compile
+            float dummyClockTime = 60;
+            sendNetworkMessage(new Message.ClockSync.Response(dummyClockTime));
         });
         addMessageHook(Message.TableData.Request.class, (req) -> {
             System.out.println("TableData request");
             // Table table = server.getTableById(req.getTableId());
-            sendNetworkMessage(new Message.TableData.Response());
+
+            //-------------NOTE------------------
+            // dummy vals to compile
+            int dummyDealerID = 1;
+            int[] dummyPlayerIDs = {1,2,3,4};
+            int dummyPlayersJoined = 4;
+            sendNetworkMessage(new Message.TableData.Response(dummyDealerID,dummyPlayerIDs,dummyPlayersJoined));
+        });
+        addMessageHook(Message.Split.Request.class, (req)->{
+            System.out.println("Split request");
+
+            //-------------NOTE------------------
+            // dummy vals to compile
+            CardHand dummyCardHand = new CardHand(21);
+            CardHand dummyCardHand2 = new CardHand(21);
+            boolean dummyStatus = true;
+            sendNetworkMessage(new Message.Split.Response(dummyCardHand,dummyCardHand2,dummyStatus));
+        });
+        addMessageHook(Message.DoubleDown.Request.class, (req)->{
+            System.out.println("Double Down request");
+
+            //-------------NOTE------------------
+            // dummy vals to compile
+            int dummyWager = 100;
+            boolean dummyStatus = true;
+            sendNetworkMessage(new Message.DoubleDown.Response(dummyWager,dummyStatus));
         });
         showMessageHooks();
     }
