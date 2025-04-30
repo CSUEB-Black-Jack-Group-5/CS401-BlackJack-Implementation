@@ -76,6 +76,10 @@ public class Dealer {
         return dealerId;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
     public int getMinValueRequired() {
         return minValueRequired;
     }
