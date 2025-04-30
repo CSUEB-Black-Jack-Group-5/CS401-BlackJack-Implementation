@@ -1,6 +1,7 @@
 package client.test_gui;
 
 import client.ClientWithHooks;
+import game.Shoe;
 import networking.Message;
 
 import javax.swing.*;
