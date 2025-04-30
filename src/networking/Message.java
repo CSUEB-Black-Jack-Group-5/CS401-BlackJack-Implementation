@@ -137,6 +137,31 @@ public class Message implements Serializable {
             }
         }
     }
+    /* Deal Method */
+    public static class Deal {
+        public static class Request extends Message {
+            private int tableId; // what table is this from
+
+            public Request(int tableId) {
+                this.tableId = tableId;
+            }
+
+            public int getTableId() {
+                return tableId;
+            }
+        }
+        public static class Response extends Message {
+            private boolean status;
+
+            public Response(boolean status) {
+                this.status = status;
+            }
+
+            public boolean getStatus() {
+                return this.status;
+            }
+        }
+    }
     /* Hit Method */            // not properly UMLed yet; this is my attempt at implementation
     public static class Hit {
         public static class Request extends Message {
