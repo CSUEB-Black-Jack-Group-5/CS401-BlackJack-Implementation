@@ -9,8 +9,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 public class DealerLobbyBlackJackPanel extends JPanel {
@@ -18,7 +16,6 @@ public class DealerLobbyBlackJackPanel extends JPanel {
     private JPanel tablesPanel;
     private JLabel dealerCountLabel;
     private JLabel playerCountLabel;
-    private ObjectOutputStream outputStream;
     private String dealerName;
     private int dealerId;
 
@@ -40,21 +37,8 @@ public class DealerLobbyBlackJackPanel extends JPanel {
 
     ///  Request Lobby Data
     private void requestLobbyData() {
-        try {
-            Message.LobbyData.Request request =  new Message.LobbyData.Request(dealerId, AccountType.DEALER);
-            outputStream.writeObject(request);
-            outputStream.flush();
-        } catch(IOException e){
-            e.printStackTrace();
-            System.err.println("Error sending lobby data request: " + e.getMessage());
-
-            ///  Pop up window to show cannot connect with server
-            JOptionPane.showMessageDialog(this,
-                    "Can not connect with server : " + e.getMessage(),
-                    "Connection Error",
-                    JOptionPane.ERROR_MESSAGE);
-
-        }
+        Message.LobbyData.Request request = new Message.LobbyData.Request(dealerId, AccountType.DEALER);
+        ClientMain.client.sendNetworkMessage(request);
     }
 
     ///  Update UI with the lobby data when get the response back from server
@@ -65,18 +49,19 @@ public class DealerLobbyBlackJackPanel extends JPanel {
         dealerCountLabel.setText("Total of dealers: " + totalDealers);
         playerCountLabel.setText("Total of players: " + totalPlayers);
 
-        ///  Because we don't have Table yet so i put it right here
-//        if (response.getTables() != null) {
+        ///  Because we don't have Table yet so i put it right here so can you guys depend on it to create table
+//       if (response.getTables() != null) {
 //            /// Clear current tables and add new ones from response
 //            tables.clear();
-//            for (Message.Table table : response.getTables()) {
-//                /// Convert network table to GUI table
-//                tables.add(new DealerLobbyBlackJack.Table(
-//                        table.getId(),
-//                        table.getOccupancy(),
-//                        table.getMaxPlayers(),
-//                        table.getDealerName()
-//                ));
+//            for (Message.Table dealerTable : response.getTables()) {
+//                /// Convert network table to game Table
+//                Table table = new Table(
+//                    dealerTable.getId(),
+//                    dealerTable.getOccupancy(),
+//                    dealerTable.getMaxPlayers(),
+//                    dealerTable.getDealerName()
+//                );
+//                tables.add(table);
 //            }
 //        }
 
@@ -273,10 +258,11 @@ public class DealerLobbyBlackJackPanel extends JPanel {
         SwingUtilities.invokeLater(() -> {
             if (response.getStatus()) {
                 int newTableId = response.getTableId();
-                tables.add(new DealerLobbyBlackJack.Table(newTableId, 0, 6, dealerName));
+                ///  add later
+//                tables.add(new DealerLobbyBlackJack.Table(newTableId, 0, 6, dealerName));
                 refreshTablesList();
 
-                // After creating a table, request updated lobby data
+                /// After creating a table, request updated lobby data
                 requestLobbyData();
             } else {
                 JOptionPane.showMessageDialog(this,

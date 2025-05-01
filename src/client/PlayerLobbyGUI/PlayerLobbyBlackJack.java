@@ -1,6 +1,7 @@
 package client.PlayerLobbyGUI;
 
 import client.ClientMain;
+import game.Table;
 import networking.AccountType;
 import networking.Message;
 
@@ -40,6 +41,12 @@ public class PlayerLobbyBlackJack extends JFrame {
         /// Create the lobby panel and set it as the content pane
         playerLobbyBlackJackPanel = new PlayerLobbyBlackJackPanel(tables);
         setContentPane(playerLobbyBlackJackPanel);
+
+        /// Set up message hooks to handle server responses
+        setupMessageHooks();
+
+        /// Request initial lobby data
+        requestLobbyData();
     }
     private void setupMessageHooks() {
         // Hook for lobby data response

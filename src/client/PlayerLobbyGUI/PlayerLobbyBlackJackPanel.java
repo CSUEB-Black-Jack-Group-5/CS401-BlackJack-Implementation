@@ -4,8 +4,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 import client.ClientMain;
@@ -46,14 +44,7 @@ public class PlayerLobbyBlackJackPanel extends JPanel {
     public void updateLobbyData(Message.LobbyData.Response response) {
         /// Update tables
 //       SwingUtilities.invokeLater(() -> {
-//            // Update dealer and player counts
-//            int totalDealers = response.getDealerCount();
-//            int totalPlayers = response.getPlayerCount();
-//
-//            totalDealersLabel.setText("Total Dealers: " + totalDealers);
-//            totalPlayersLabel.setText("Total Players: " + totalPlayers);
-//
-//            // Update tables if necessary
+//            /// Update tables if necessary
 //            if (response.getTables() != null) {
 //                // Clear current tables and add new ones from response
 //                tables.clear();

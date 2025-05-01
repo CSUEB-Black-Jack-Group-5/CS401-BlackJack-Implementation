@@ -44,6 +44,13 @@ public class DealerLobbyBlackJack extends JFrame {
         /// Create the lobby panel and set it as the content pane
         dealerLobbyBlackJackPanel = new DealerLobbyBlackJackPanel(tables);
         setContentPane(dealerLobbyBlackJackPanel);
+
+        /// Set up message hooks to handle server responses
+        setupMessageHooks();
+
+        /// Request initial lobby data
+        requestLobbyData();
+
     }
 
     private void setupMessageHooks() {
