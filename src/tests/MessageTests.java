@@ -106,8 +106,22 @@ public class MessageTests {
     @Nested
     @DisplayName("Stand")
     public class Stand {
-        @Test public void request_constructor() {}
-        @Test public void response_constructor() {}
+        @Test public void request_constructor() {
+            Message.Stand.Request request = new Message.Stand.Request(3);
+            Assertions.assertEquals(3, request.getPlayerId());
+
+            Message.Stand.Request request1 = new Message.Stand.Request(94);
+            Assertions.assertEquals(94, request1.getPlayerId());
+        }
+        @Test public void response_constructor() {
+            CardHand cardHand = new CardHand(21);
+            cardHand.addCard(new Card(Suit.CLUBS, Value.FIVE));
+            cardHand.addCard(new Card(Suit.DIAMONDS, Value.FIVE));
+            Message.Stand.Response response = new Message.Stand.Response(cardHand, cardHand.bustCheck());
+
+            Assertions.assertEquals(cardHand, response.getHand());
+            Assertions.assertFalse(response.getStatus());
+        }
     }
 
     @Nested
