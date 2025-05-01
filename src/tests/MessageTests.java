@@ -259,8 +259,22 @@ public class MessageTests {
     @Nested
     @DisplayName("PlayerLeave")
     public class PlayerLeave {
-        @Test public void request_constructor() {}
-        @Test public void response_constructor() {}
+        @Test public void request_constructor() {
+            int playerId = 4;  // NOTE: Again here, username as id or number.
+            int tableId = 1;
+            Message.PlayerLeave.Request request = new Message.PlayerLeave.Request(playerId, tableId);
+            Assertions.assertEquals(playerId, request.getPlayerId());
+            Assertions.assertEquals(tableId, request.getTableId());
+        }
+        @Test public void response_constructor() {
+            boolean status = true;
+            Message.PlayerLeave.Response response = new Message.PlayerLeave.Response(status);
+            Assertions.assertEquals(status, response.getStatus());
+
+            status = false;
+            response = new Message.PlayerLeave.Response(status);
+            Assertions.assertEquals(status, response.getStatus());
+        }
     }
 
     @Nested
