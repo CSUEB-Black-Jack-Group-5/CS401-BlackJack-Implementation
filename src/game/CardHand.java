@@ -12,7 +12,7 @@ public class CardHand {
     }
     public boolean checkSplit() {
         if (this.numCards != 2) return false;
-        return this.hand[0] == this.hand[1];
+        return this.hand[0].getValue() == this.hand[1].getValue();
     }
     public Card getAndRemoveSplitCard() {
         Card splitCard = this.hand[1];
