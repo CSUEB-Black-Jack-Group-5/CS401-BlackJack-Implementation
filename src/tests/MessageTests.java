@@ -207,8 +207,18 @@ public class MessageTests {
     @Nested
     @DisplayName("GameData")
     public class GameData {
-        @Test public void request_constructor() {}
-        @Test public void response_constructor() {}
+        @Test public void request_constructor() {
+            int playerId = 453;
+            Message.GameData.Request request = new Message.GameData.Request(playerId);
+            Assertions.assertEquals(playerId, request.getPlayerId());
+        }
+        @Test public void response_constructor() {
+            CardHand playerHand = new CardHand(21);
+            CardHand dealerHand = new CardHand(21);
+            Message.GameData.Response response = new Message.GameData.Response(playerHand, dealerHand);
+            Assertions.assertEquals(playerHand, response.getPlayerHand());
+            Assertions.assertEquals(dealerHand, response.getDealerHand());
+        }
     }
 
     @Nested
