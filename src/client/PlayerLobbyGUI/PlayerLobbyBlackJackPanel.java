@@ -4,11 +4,20 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+
+import client.ClientMain;
+import networking.Message;
+import networking.AccountType;
 
 public class PlayerLobbyBlackJackPanel extends JPanel {
     private ArrayList<PlayerLobbyBlackJack.Table> tables;
     private JPanel tablesPanel;
+    private int playerId;
+    private String playerName;
+    private int currentTableId;
 
     /// Background texture colors
     private Color feltGreen = new Color(0, 102, 0); // Brighter green like in the image
@@ -16,13 +25,52 @@ public class PlayerLobbyBlackJackPanel extends JPanel {
 
     public PlayerLobbyBlackJackPanel(ArrayList<PlayerLobbyBlackJack.Table> tables) {
         this.tables = tables;
+        this.playerId = playerId;
+        this.playerName = playerName;
         setLayout(new BorderLayout());
         setBackground(feltGreen);
 
         ///  Setup UI for player side
         playerSetupUI();
+
+        /// Request lobby data when panel is created
+        requestLobbyData();
+    }
+    /// Method to request lobby data from server
+    private void requestLobbyData() {
+        Message.LobbyData.Request request = new Message.LobbyData.Request(playerId, AccountType.PLAYER);
+        ClientMain.client.sendNetworkMessage(request);
     }
 
+    ///  Method to update UI with lobby data received from server
+    public void updateLobbyData(Message.LobbyData.Response response) {
+        /// Update tables
+//       SwingUtilities.invokeLater(() -> {
+//            // Update dealer and player counts
+//            int totalDealers = response.getDealerCount();
+//            int totalPlayers = response.getPlayerCount();
+//
+//            totalDealersLabel.setText("Total Dealers: " + totalDealers);
+//            totalPlayersLabel.setText("Total Players: " + totalPlayers);
+//
+//            // Update tables if necessary
+//            if (response.getTables() != null) {
+//                // Clear current tables and add new ones from response
+//                tables.clear();
+//                for (Message.Table table : response.getTables()) {
+//                    // Convert network table to GUI table
+//                    tables.add(new PlayerLobbyBlackJack.Table(
+//                        table.getId(),
+//                        table.getOccupancy(),
+//                        table.getMaxPlayers(),
+//                        table.getDealerName()
+//                    ));
+//                }
+
+        /// Refresh UI
+        refreshTablesList();
+
+    }
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -209,15 +257,44 @@ public class PlayerLobbyBlackJackPanel extends JPanel {
         }
 
         /// Join the table (increment occupancy)
-        table.occupancy++;
-
-        /// Show confirmation message
-        JOptionPane.showMessageDialog(this,
-                "You've joined Table " + table.id,
-                "Table Joined",
-                JOptionPane.INFORMATION_MESSAGE);
-
-        /// Refresh the UI
-        refreshTablesList();
+        // Send join table request to server
+        currentTableId = table.id; /// Store the table ID for the response
+        Message.JoinTable.Request request = new Message.JoinTable.Request(playerId, table.id);
+        ClientMain.client.sendNetworkMessage(request);
     }
+
+    /// Method to handle join table response
+    public void handleJoinTableResponse(Message.JoinTable.Response response, int tableId) {
+        if (response.getStatus()) {
+            /// Find the table and update its occupancy
+            for (PlayerLobbyBlackJack.Table table : tables) {
+                if (table.id == tableId) {
+                    table.occupancy++;
+                    break;
+                }
+            }
+
+            /// Refresh the UI
+            refreshTablesList();
+
+            /// Show confirmation message
+            JOptionPane.showMessageDialog(this,
+                    "You've joined Table " + tableId,
+                    "Table Joined",
+                    JOptionPane.INFORMATION_MESSAGE);
+
+            /// Request updated lobby data
+            requestLobbyData();
+
+        } else {
+            JOptionPane.showMessageDialog(this,
+                    "Failed to join table. It may be full or no longer available.",
+                    "Join Failed",
+                    JOptionPane.ERROR_MESSAGE);
+
+            // Request updated lobby data to refresh the table list
+            requestLobbyData();
+        }
+    }
+
 }

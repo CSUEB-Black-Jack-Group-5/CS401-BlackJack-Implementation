@@ -1,9 +1,16 @@
 package client.DealerLobbyGUI;
 
+import client.ClientMain;
+import networking.AccountType;
+import networking.Message;
+import game.Table;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 public class DealerLobbyBlackJackPanel extends JPanel {
@@ -11,6 +18,9 @@ public class DealerLobbyBlackJackPanel extends JPanel {
     private JPanel tablesPanel;
     private JLabel dealerCountLabel;
     private JLabel playerCountLabel;
+    private ObjectOutputStream outputStream;
+    private String dealerName;
+    private int dealerId;
 
     /// Background texture colors
     private Color feltGreen = new Color(0, 102, 0); // Brighter green like in the image
@@ -23,6 +33,55 @@ public class DealerLobbyBlackJackPanel extends JPanel {
 
         ///  Setup UI
         dealerSetupUI();
+
+        ///  Request Lobby Data when panel is created
+        requestLobbyData();
+    }
+
+    ///  Request Lobby Data
+    private void requestLobbyData() {
+        try {
+            Message.LobbyData.Request request =  new Message.LobbyData.Request(dealerId, AccountType.DEALER);
+            outputStream.writeObject(request);
+            outputStream.flush();
+        } catch(IOException e){
+            e.printStackTrace();
+            System.err.println("Error sending lobby data request: " + e.getMessage());
+
+            ///  Pop up window to show cannot connect with server
+            JOptionPane.showMessageDialog(this,
+                    "Can not connect with server : " + e.getMessage(),
+                    "Connection Error",
+                    JOptionPane.ERROR_MESSAGE);
+
+        }
+    }
+
+    ///  Update UI with the lobby data when get the response back from server
+    public void updateLobbyData(Message.LobbyData.Response response){
+        int totalDealers = response.getDealerCount();
+        int totalPlayers = response.getPlayerCount();
+
+        dealerCountLabel.setText("Total of dealers: " + totalDealers);
+        playerCountLabel.setText("Total of players: " + totalPlayers);
+
+        ///  Because we don't have Table yet so i put it right here
+//        if (response.getTables() != null) {
+//            /// Clear current tables and add new ones from response
+//            tables.clear();
+//            for (Message.Table table : response.getTables()) {
+//                /// Convert network table to GUI table
+//                tables.add(new DealerLobbyBlackJack.Table(
+//                        table.getId(),
+//                        table.getOccupancy(),
+//                        table.getMaxPlayers(),
+//                        table.getDealerName()
+//                ));
+//            }
+//        }
+
+        // Refresh UI
+        refreshTablesList();
     }
 
     @Override
@@ -80,13 +139,6 @@ public class DealerLobbyBlackJackPanel extends JPanel {
         JPanel statsPanel = new JPanel(new GridLayout(1, 2));
         statsPanel.setOpaque(false);
 
-        dealerCountLabel = new JLabel("Total of dealers: " + tables.size());
-        playerCountLabel = new JLabel("Total of players: " + countTotalPlayers());
-        dealerCountLabel.setForeground(new Color(217, 187, 132)); // Gold text
-        playerCountLabel.setForeground(new Color(217, 187, 132)); // Gold text
-        dealerCountLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        playerCountLabel.setFont(new Font("Arial", Font.BOLD, 14));
-
         JPanel dealerCountPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JPanel playerCountPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         dealerCountPanel.setOpaque(false);
@@ -133,7 +185,7 @@ public class DealerLobbyBlackJackPanel extends JPanel {
         createTableButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                addNewTable();
+                createNewTable();
             }
         });
 
@@ -169,57 +221,77 @@ public class DealerLobbyBlackJackPanel extends JPanel {
 
         Color tableColor;
 
-        if (table.occupancy == table.maxPlayers) {
-            tableColor = new Color(147, 29, 43, 220); // Full table - deep red
-        } else if (table.occupancy > table.maxPlayers / 2) {
-            tableColor = new Color(25, 97, 39, 220); // More than half full - deep green
-        } else if (table.occupancy > 0) {
-            tableColor = new Color(33, 84, 120, 220); // Some players - deep blue
-        } else {
-            tableColor = new Color(74, 35, 90, 220); // Empty table - deep purple
-        }
+        /// Do when finish table
+//        if (table.occupancy == table.maxPlayers) {
+//            tableColor = new Color(147, 29, 43, 220); // Full table - deep red
+//        } else if (table.occupancy > table.maxPlayers / 2) {
+//            tableColor = new Color(25, 97, 39, 220); // More than half full - deep green
+//        } else if (table.occupancy > 0) {
+//            tableColor = new Color(33, 84, 120, 220); // Some players - deep blue
+//        } else {
+//            tableColor = new Color(74, 35, 90, 220); // Empty table - deep purple
+//        }
 
-        panel.setBackground(tableColor);
+//        panel.setBackground(tableColor);
         panel.setLayout(new BorderLayout(5, 5));
         panel.setBorder(BorderFactory.createCompoundBorder(
                 new GoldBorderDealerLobby(2, 8),
                 BorderFactory.createEmptyBorder(8, 8, 8, 8)
         ));
+        /// Do when finish table
+//        JLabel titleLabel = new JLabel("Table " + table.id);
+//        titleLabel.setForeground(new Color(236, 236, 236)); // Off-white text
+//        titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
+//        titleLabel.setHorizontalAlignment(JLabel.CENTER);
+//
+//        JLabel occupancyLabel = new JLabel(table.occupancy + "/" + table.maxPlayers);
+//        occupancyLabel.setForeground(new Color(217, 187, 132)); // Gold text
+//        occupancyLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+//        occupancyLabel.setHorizontalAlignment(JLabel.CENTER);
+//
+//        JLabel dealerLabel = new JLabel(table.dealerName);
+//        dealerLabel.setForeground(new Color(175, 175, 175)); // Light gray
+//        dealerLabel.setFont(new Font("Arial", Font.ITALIC, 12));
+//        dealerLabel.setHorizontalAlignment(JLabel.CENTER);
 
-        JLabel titleLabel = new JLabel("Table " + table.id);
-        titleLabel.setForeground(new Color(236, 236, 236)); // Off-white text
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        titleLabel.setHorizontalAlignment(JLabel.CENTER);
-
-        JLabel occupancyLabel = new JLabel(table.occupancy + "/" + table.maxPlayers);
-        occupancyLabel.setForeground(new Color(217, 187, 132)); // Gold text
-        occupancyLabel.setFont(new Font("Arial", Font.PLAIN, 14));
-        occupancyLabel.setHorizontalAlignment(JLabel.CENTER);
-
-        JLabel dealerLabel = new JLabel(table.dealerName);
-        dealerLabel.setForeground(new Color(175, 175, 175)); // Light gray
-        dealerLabel.setFont(new Font("Arial", Font.ITALIC, 12));
-        dealerLabel.setHorizontalAlignment(JLabel.CENTER);
-
-        panel.add(titleLabel, BorderLayout.NORTH);
-        panel.add(occupancyLabel, BorderLayout.CENTER);
-        panel.add(dealerLabel, BorderLayout.SOUTH);
-        panel.setPreferredSize(new Dimension(100, 80));
+            ///  Do when finish table
+//        panel.add(titleLabel, BorderLayout.NORTH);
+//        panel.add(occupancyLabel, BorderLayout.CENTER);
+//        panel.add(dealerLabel, BorderLayout.SOUTH);
+//        panel.setPreferredSize(new Dimension(100, 80));
 
         return panel;
     }
 
-    private void addNewTable() {
-        int newId = tables.size() + 1;
-        tables.add(new DealerLobbyBlackJack.Table(newId, 0, 6, "DealerName"));
-        refreshTablesList();
+    private void createNewTable() {
+        Message.CreateTable.Request request = new Message.CreateTable.Request(dealerName);
+        ClientMain.client.sendNetworkMessage(request);
     }
 
+    /// Method to handle create table response
+    public void handleCreateTableResponse(Message.CreateTable.Response response) {
+        SwingUtilities.invokeLater(() -> {
+            if (response.getStatus()) {
+                int newTableId = response.getTableId();
+                tables.add(new DealerLobbyBlackJack.Table(newTableId, 0, 6, dealerName));
+                refreshTablesList();
+
+                // After creating a table, request updated lobby data
+                requestLobbyData();
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Failed to create table. Please try again.",
+                        "Table Creation Failed",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        });
+    }
+    ///  Count Players
     private int countTotalPlayers() {
         int totalPlayers = 0;
-        for (DealerLobbyBlackJack.Table table : tables) {
-            totalPlayers += table.occupancy;
-        }
+//        for (DealerLobbyBlackJack.Table table : tables) {
+//            totalPlayers += table.occupancy;
+//        }
         return totalPlayers;
     }
 }
