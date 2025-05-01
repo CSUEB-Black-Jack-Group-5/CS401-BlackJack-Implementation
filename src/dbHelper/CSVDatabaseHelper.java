@@ -2,25 +2,24 @@ package dbHelper;
 
 import java.util.Scanner;
 import java.io.*;
-import java.util.UUID;
+
 
 public class CSVDatabaseHelper {
 
 
-    private static final String playerFile = System.getProperty("user.dir") + "/res/db/allPlayers/allPlayers.csv";
+    private static final String allPlayerFile = System.getProperty("user.dir") + "/res/db/allPlayers/allPlayers.csv";
 
     // Synchronized method to add player to our "db"
     public synchronized static boolean addPlayer(String username, String password) {
 
         if(playerExists(username))return false;
 
-        // generating uid can change if needed
-        String uid = UUID.randomUUID().toString();
+
         double startingFunds = 1000.0;
 
         try{
-            FileWriter myWriter = new FileWriter(playerFile,true);
-            myWriter.write(username + "," + password + "," +  uid + "," + startingFunds +"\n");
+            FileWriter myWriter = new FileWriter(allPlayerFile,true);
+            myWriter.write(username + "," + password + "," + startingFunds +"\n");
             myWriter.close();
         }catch (IOException e){
             e.printStackTrace();
