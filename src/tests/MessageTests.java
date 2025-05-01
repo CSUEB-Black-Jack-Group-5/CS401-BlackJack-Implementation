@@ -238,8 +238,22 @@ public class MessageTests {
     @Nested
     @DisplayName("PlayerReady")
     public class PlayerReady {
-        @Test public void request_constructor() {}
-        @Test public void response_constructor() {}
+        @Test public void request_constructor() {
+            // NOTE: In here it appears the consistency of messages in how they use playerId, and dealerId are inconsistent
+            // NOTE:    Before merging this we need to be sure of what format they are
+            String username = "alfjah";
+            Message.PlayerReady.Request request = new Message.PlayerReady.Request(username);
+            Assertions.assertEquals(username,  request.getUsername());
+        }
+        @Test public void response_constructor() {
+            boolean wasReadySuccessful = true;
+            Message.PlayerReady.Response response = new Message.PlayerReady.Response(wasReadySuccessful);
+            Assertions.assertEquals(wasReadySuccessful, response.getStatus());
+
+            wasReadySuccessful = false;
+            response = new Message.PlayerReady.Response(wasReadySuccessful);
+            Assertions.assertEquals(wasReadySuccessful, response.getStatus());
+        }
     }
 
     @Nested
