@@ -224,8 +224,15 @@ public class MessageTests {
     @Nested
     @DisplayName("ClockSync")
     public class ClockSync {
-        @Test public void request_constructor() {}
-        @Test public void response_constructor() {}
+        @Test public void request_constructor() {
+            Message.ClockSync.Request request = new Message.ClockSync.Request();
+            // No data is part of the request (simply asking the server for the table's current clock value)
+        }
+        @Test public void response_constructor() {
+            float clockTime = 15.f;
+            Message.ClockSync.Response response = new Message.ClockSync.Response(clockTime);
+            Assertions.assertEquals(clockTime, response.getClockTime(), 0.01f);
+        }
     }
 
     @Nested
