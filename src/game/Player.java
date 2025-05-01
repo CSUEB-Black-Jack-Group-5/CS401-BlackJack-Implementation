@@ -14,6 +14,8 @@ public class Player {
     private Wallet wallet;
     private String username; // Username format: "basims21"
     private String userId;   // UserId format: "u001"
+    private int wins; // added for database records
+    private int losses;
 
     public Player(String username, String userId) {
         this.playerId = ++idCount;
@@ -149,43 +151,16 @@ public class Player {
         return wallet;
     }
 
-    // Database Methods
+    public int getWins() { return wins; }
 
-    /**
-     * Saves the player's updated funds inside db/Players/<userId>/<userId>.csv
-     */
-    public void saveFunds() {
-        String filePath = "db/Players/" + userId + "/" + userId + ".csv";
-        try {
-            Path path = Paths.get(filePath);
-            StringBuilder updatedContent = new StringBuilder();
-            try (BufferedReader reader = Files.newBufferedReader(path)) {
-                String header = reader.readLine();
-                updatedContent.append(header).append("\n");
-                String line = reader.readLine();
-                if (line != null) {
-                    String[] fields = line.split("\t");
-                    fields[3] = String.valueOf(wallet.getFunds());
-                    updatedContent.append(String.join("\t", fields));
-                }
-            }
-            try (BufferedWriter writer = Files.newBufferedWriter(path)) {
-                writer.write(updatedContent.toString());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public int getLosses() { return losses; }
+
+    public void incrementWins() {
+        wins++;
     }
 
-    /**
-     * Appends a new history entry to db/Players/<userId>/<userId>_history.csv
-     */
-    public void saveHistory(int wins, int losses, String gameId, String dealerId) {
-        String filePath = "db/Players/" + userId + "/" + userId + "_history.csv";
-        try (PrintWriter writer = new PrintWriter(new FileWriter(filePath, true))) {
-            writer.println(userId + "\t" + wins + "\t" + losses + "\t" + gameId + "\t" + dealerId);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void incrementLosses() {
+        losses++;
     }
 }
+
