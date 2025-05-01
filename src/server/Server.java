@@ -81,6 +81,9 @@ public class Server {
                         String username = loginRequest.getUsername();
                         String password = loginRequest.getPassword();
 
+                        // Still have not done the checking still trying to figure out how to send the
+                        // request via client side.
+
                         // TODO: if (!checkCredentials(username, password))
                         //          writer.writeObject(Message.Login.Response(/* fail status */));
                         // TODO: AccountType accountType = serverRef.db.getUserTypeFor(username);
@@ -90,6 +93,11 @@ public class Server {
                             case AccountType.DEALER -> new DealerClientThread(socket, serverRef, writer, reader);
                         };
                         writer.writeObject(new Message.Login.Response(true, accountType));
+
+                        // still need to look into this but I think we are going to have to trigger the
+                        // set the loginSuccess method to true here...
+
+
                         connectedClients[connectClientsSize++] = clientThread;
                         clientsInLobby[clientsInLobbySize++] = clientThread;
                         new Thread(clientThread).start();

@@ -1,10 +1,9 @@
 package client;
 
-import client.gui.LoginGUI;
-import networking.Message;
+import client.gui.BlackjackIntroGUI;
 
 public class ClientMain {
-    static LoginGUI loginGUI;
+    static BlackjackIntroGUI GUI;
     static ClientWithHooks client;
     // static ClientGUI clientGUI;
 
@@ -14,9 +13,9 @@ public class ClientMain {
             The server will send a message back indicating what type of user logged in
                - This case is handled below
          */
-        // loginGUI = new LoginGui(client);
+         GUI = new BlackjackIntroGUI(client);
         // client.addMessageHook(Message.Login.Response.class, (res) -> {
-        //     loginGUI.close();                          // close the login gui (we're done with it)
+        //     GUI.close();                          // close the login gui (we're done with it)
         //     switch (res.getType()) {
         //         case DEALER: {
         //             client.addMessageHook(Message.Leave.Response.class, (res) -> {});
