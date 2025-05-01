@@ -173,8 +173,16 @@ public class MessageTests {
     @Nested
     @DisplayName("LobbyData")
     public class LobbyData {
-        @Test public void request_constructor() {}
-        @Test public void response_constructor() {}
+        @Test public void request_constructor() {
+            int dealerId = 4;
+            Message.LobbyData.Request request = new Message.LobbyData.Request(dealerId, AccountType.PLAYER);
+            Assertions.assertEquals(dealerId, request.getDealerId());
+            Assertions.assertEquals(AccountType.PLAYER, request.getType());
+        }
+        @Test public void response_constructor() {
+            // NOTE: Not testable right now. Table is an unimplemented class.
+            // Message.LobbyData.Response response = new Message.LobbyData.Response()
+        }
     }
 
     @Nested
