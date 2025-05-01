@@ -74,11 +74,8 @@ public class BlackjackIntroGUI extends Component {
 
         /// Login check popup window successful result
         if (loginGUI.isSucceeded()) {
-            frame.dispose();  // or frame.setVisible(false);
+            frame.dispose();
 
-            // Open the dealer lobby
-            DealerLobbyBlackJack dealerLobby = new DealerLobbyBlackJack();
-            dealerLobby.setVisible(true);
         }
     }
 }

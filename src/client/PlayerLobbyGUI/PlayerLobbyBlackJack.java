@@ -28,7 +28,7 @@ public class PlayerLobbyBlackJack extends JFrame {
         tables.add(new Table(4, 6, 6));
 
         /// Set up the frame
-        setTitle("Dealer Lobby");
+        setTitle("Player Lobby");
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
