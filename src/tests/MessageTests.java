@@ -90,7 +90,17 @@ public class MessageTests {
             // NOTE: I'm not 100% confident with this test. Will adjust to be more accurate when merged with staging
             Assertions.assertEquals(mockShoe, request.getDeck());
         }
-        @Test public void response_constructor() {}
+        @Test public void response_constructor() {
+            Card drawCard = new Card(Suit.CLUBS, Value.FIVE);      // what card was drawn from the shoe
+            CardHand cardHand = new CardHand(21);        // what the player's current hand is
+            cardHand.addCard(new Card(Suit.DIAMONDS, Value.FOUR)); // --
+            cardHand.addCard(new Card(Suit.CLUBS, Value.SIX));     // --
+            Message.Hit.Response response = new Message.Hit.Response(drawCard, cardHand, cardHand.bustCheck());
+
+            Assertions.assertEquals(cardHand.bustCheck(), response.getStatus());
+            Assertions.assertEquals(drawCard, response.getDraw());
+            Assertions.assertFalse(response.getStatus());
+        }
     }
 
     @Nested
