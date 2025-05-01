@@ -280,7 +280,21 @@ public class MessageTests {
     @Nested
     @DisplayName("DealerLeave")
     public class DealerLeave {
-        @Test public void request_constructor() {}
-        @Test public void response_constructor() {}
+        @Test public void request_constructor() {
+            int dealerId = 343;
+            int tableId = 3;
+            Message.DealerLeave.Request request = new Message.DealerLeave.Request(dealerId, tableId);
+            Assertions.assertEquals(dealerId, request.getDealerId());
+            Assertions.assertEquals(tableId, request.getTableId());
+        }
+        @Test public void response_constructor() {
+            boolean status = false;
+            Message.DealerLeave.Response response = new Message.DealerLeave.Response(status);
+            Assertions.assertEquals(status, response.getStatus());
+
+            status = true;
+            response = new Message.DealerLeave.Response(status);
+            Assertions.assertEquals(status, response.getStatus());
+        }
     }
 }
