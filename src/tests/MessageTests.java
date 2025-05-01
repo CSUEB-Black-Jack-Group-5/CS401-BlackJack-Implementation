@@ -188,8 +188,20 @@ public class MessageTests {
     @Nested
     @DisplayName("TableData")
     public class TableData {
-        @Test public void request_constructor() {}
-        @Test public void response_constructor() {}
+        @Test public void request_constructor() {
+            int dealerId = 536;
+            Message.TableData.Request request = new Message.TableData.Request(dealerId);
+            Assertions.assertEquals(dealerId, request.getDealerId());
+        }
+        @Test public void response_constructor() {
+            int dealerId = 536;
+            int[] playerIds = new int[] {0, 4, 5, 7, 9};
+            int playersJoined = 5;
+            Message.TableData.Response response = new Message.TableData.Response(dealerId, playerIds, playersJoined);
+            Assertions.assertEquals(dealerId, response.getDealerId());
+            Assertions.assertArrayEquals(playerIds, response.getPlayerIds());
+            Assertions.assertEquals(playersJoined, response.getPlayersJoined());
+        }
     }
 
     @Nested
