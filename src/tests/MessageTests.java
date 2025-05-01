@@ -127,8 +127,28 @@ public class MessageTests {
     @Nested
     @DisplayName("Split")
     public class Split {
-        @Test public void request_constructor() {}
-        @Test public void response_constructor() {}
+        @Test public void request_constructor() {
+            int playerId = 4;
+            CardHand cardHand = new CardHand(21);
+            // NOTE: This should not take in a card hand. The server already knows about the player's hand
+            Message.Split.Request request = new Message.Split.Request(playerId, cardHand);
+            Assertions.assertEquals(playerId, request.getPlayerId());
+            Assertions.assertEquals(cardHand, request.getHand());
+        }
+        @Test public void response_constructor() {
+            // NOTE: Depends on PR #26 for player split functions
+            Player player = new Player();
+            player.getHand().addCard(new Card(Suit.DIAMONDS, Value.FIVE));
+            player.getHand().addCard(new Card(Suit.SPADES, Value.FIVE));
+            Assertions.assertTrue(player.checkSplit());
+
+            CardHand splitHand = new CardHand(21);
+            splitHand.addCard(player.getAndRemoveSplitCard());
+            Message.Split.Response response = new Message.Split.Response(player.getHand(), splitHand, player.checkSplit());
+            Assertions.assertEquals(player.getHand(), response.getHand());
+            Assertions.assertEquals(splitHand, response.getSplitHand());
+            Assertions.assertEquals(player.checkSplit(), response.getStatus());
+        }
     }
 
     @Nested
