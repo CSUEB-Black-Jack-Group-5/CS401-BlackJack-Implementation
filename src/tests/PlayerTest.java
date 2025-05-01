@@ -3,6 +3,7 @@ package test;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import game.*;
 
 /**
  * Unit tests for the Player class.
@@ -107,5 +108,21 @@ public class PlayerTest {
         player.getHand().addCard(new Card(Suit.SPADES, Value.KING));
         player.getHand().addCard(new Card(Suit.CLUBS, Value.TWO));
         assertTrue(player.bustCheck());
+    }
+
+    @Test
+    public void testIncrementWins() {
+        // Test that win count is incremented correctly
+        int before = player.getWins();
+        player.incrementWins();
+        assertEquals(before + 1, player.getWins());
+    }
+
+    @Test
+    public void testIncrementLosses() {
+        // Test that loss count is incremented correctly
+        int before = player.getLosses();
+        player.incrementLosses();
+        assertEquals(before + 1, player.getLosses());
     }
 }
