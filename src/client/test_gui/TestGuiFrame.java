@@ -67,7 +67,8 @@ public class TestGuiFrame extends JFrame {
             client.sendNetworkMessage(new Message.CreateTable.Request(dealerId));
         }).build());
         dealerPanel.add(new TestMessagePanel.Builder().setText("Deal").setButtonListener((ctx) -> {
-            client.sendNetworkMessage(new Message.Deal.Request());
+            int tableId = 0;
+            client.sendNetworkMessage(new Message.Deal.Request(tableId));
         }).build());
         dealerPanel.add(new TestMessagePanel.Builder().setText("DealerLeave").setButtonListener((ctx) -> {
             int dealerId = 0;
