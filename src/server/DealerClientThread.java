@@ -14,32 +14,85 @@ import java.net.Socket;
  * DealerClientThread handles all server-side message interactions for a dealer client.
  */
 public class DealerClientThread extends ClientThreadWithHooks {
-    private final Server serverRef;         // Used for accessing tables and lobby players from the main server
-    private final Dealer dealer;            // Dealer instance that handles dealing and game state
-    private Player currentPlayer;           // The currently active player at the dealer's table (set externally)
+    private final Server serverRef;
+    private final Dealer dealer;
+    private Player currentPlayer;
 
     /**
      * Constructor initializes the thread, registers message hooks, and prepares the dealer object.
      */
+
     public DealerClientThread(Socket socket, Server serverRef, ObjectOutputStream writer, ObjectInputStream reader) {
         super(socket, writer, reader);
         this.serverRef = serverRef;
-
-        // Create the dealer instance with default username/password and minimum stand value of 17
-        this.dealer = new Dealer("dealer1", "letmein", 17);
+        this.dealer = new Dealer("dealer1", "letmein", 17);  // Temporary dealer login
 
         System.out.println("Spawned dealer thread");
 
-        // Handle STAND Request — player finishes their turn
+        /**
+         * This is where the server game logic for the dealer happens.
+         *
+         * The original commented-out logic is preserved below for reference.
+         * I also tried implementing both hooks below these comments.
+         */
+
+        // addMessageHook(Message.CreateTable.Request.class, (req) -> {
+        //     System.out.println("CreateTable Request");
+        //     serverRef.spawnTable();
+        //     sendNetworkMessage(new Message.CreateTable.Response()); //TODO: Be more thoughtful about errors
+        //     serverRef.broadcastNetworkMessage(new Message.LobbyData.Response());
+        // });
+
+        // addMessageHook(Message.Deal.Request.class, (req) -> {
+        //     System.out.println("Deal Request");
+        //     sendNetworkMessage(new Message.Deal.Response());
+        // });
+
+        /**
+         * Handles CreateTable Request — spawns a new table and sends a basic response.
+         * Right now, this just assumes the table is always created successfully.
+         */
+        addMessageHook(Message.CreateTable.Request.class, (req) -> {
+            System.out.println("CreateTable Request");
+
+            // Create a new table on the server
+            serverRef.spawnTable();
+
+            // Send back a dummy tableId for now (e.g., always 1)
+            // Replace with actual table ID logic if needed later
+            sendNetworkMessage(new Message.CreateTable.Response(true, 1));
+        });
+
+
+
+        /**
+         * Handles Deal Request — deals two cards to the current player.
+         * This is a basic placeholder version until full table support is added.
+         */
+        addMessageHook(Message.Deal.Request.class, (req) -> {
+            System.out.println("Deal Request");
+
+            if (currentPlayer != null) {
+                dealer.dealCard(currentPlayer);
+                dealer.dealCard(currentPlayer);
+
+                // Send updated hand info back to the dealer client
+                sendNetworkMessage(new Message.GameData.Response(currentPlayer.getHand(), dealer.getHand()));
+            } else {
+                System.err.println("No current player set for this dealer.");
+            }
+
+            sendNetworkMessage(new Message.Deal.Response());
+        });
+
+
+
+        // Handle STAND Request — sends player hand only (no bust check)
         addMessageHook(Message.Stand.Request.class, (req) -> {
             System.out.println("Stand Request");
 
-            // If a player is set, use their actual hand and bust status, otherwise use a placeholder
             CardHand playerHand = currentPlayer != null ? currentPlayer.getHand() : new CardHand(21);
-            boolean isBust = currentPlayer != null && currentPlayer.bustCheck();
-
-            // Send a response with the player's final hand and whether they busted
-            sendNetworkMessage(new Message.Stand.Response(playerHand, isBust));
+            sendNetworkMessage(new Message.Stand.Response(playerHand, false));
         });
 
         // Handle LOBBY DATA Request — returns info about all tables and current activity
@@ -50,7 +103,7 @@ public class DealerClientThread extends ClientThreadWithHooks {
             TableThread[] tableThreads = serverRef.getTables();
             Table[] tables = new Table[tableThreads.length];
 
-            // Convert each TableThread to its underlying Table object
+            // Convert each TableThread to it's underlying Table object
             for (int i = 0; i < tableThreads.length; i++) {
                 tables[i] = tableThreads[i] != null ? tableThreads[i].getTable() : null;
             }
@@ -63,11 +116,11 @@ public class DealerClientThread extends ClientThreadWithHooks {
             sendNetworkMessage(new Message.LobbyData.Response(tables, activePlayers, dealerId));
         });
 
-        // Handle GAME DATA Request — sends current state of the dealer's and player's hands
+        // Handle GAME DATA Request — sends current state of dealer + player hand
         addMessageHook(Message.GameData.Request.class, (req) -> {
             System.out.println("GameData request");
 
-            // Get the dealer’s and current player’s hands, or a default if player not set
+            // Get the dealer's amd current player's hands, or a default if player not set
             CardHand dealerHand = dealer.getHand();
             CardHand playerHand = currentPlayer != null ? currentPlayer.getHand() : new CardHand(21);
 
@@ -79,20 +132,22 @@ public class DealerClientThread extends ClientThreadWithHooks {
         addMessageHook(Message.ClockSync.Request.class, (req) -> {
             System.out.println("ClockSync request");
 
-            // Calculate server time in seconds
+            // Calculates server time in seconds
             float serverTime = System.nanoTime() / 1_000_000_000.0f;
 
             // Respond with server time
             sendNetworkMessage(new Message.ClockSync.Response(serverTime));
         });
 
+
         // Handle TABLE DATA Request — sends static info about a specific table
         addMessageHook(Message.TableData.Request.class, (req) -> {
             System.out.println("TableData request");
 
+
             // These are placeholders; we can replace with real table/game logic later
             int tableId = 1;
-            int[] playerIds = new int[]{101, 102};  // Example hardcoded player IDs
+            int[] playerIds = new int[]{101, 102}; // Example hardcoded player IDs
             int dealerId = dealer.getDealerId();
 
             // Respond with table metadata
@@ -101,7 +156,7 @@ public class DealerClientThread extends ClientThreadWithHooks {
     }
 
     /**
-     * Sets the current player for the dealer thread to use during turn-based actions.
+     * Sets the currently active player for dealer reference.
      */
     public void setCurrentPlayer(Player player) {
         this.currentPlayer = player;
