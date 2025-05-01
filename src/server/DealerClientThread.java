@@ -81,8 +81,9 @@ public class DealerClientThread extends ClientThreadWithHooks {
             } else {
                 System.err.println("No current player set for this dealer.");
             }
-
-            sendNetworkMessage(new Message.Deal.Response());
+            //---------DUMMY ID -----------------
+            boolean dummyStatus = true;
+            sendNetworkMessage(new Message.Deal.Response(dummyStatus));
         });
 
 
