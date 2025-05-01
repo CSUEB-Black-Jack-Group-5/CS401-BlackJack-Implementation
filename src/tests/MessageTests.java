@@ -154,8 +154,20 @@ public class MessageTests {
     @Nested
     @DisplayName("DoubleDown")
     public class DoubleDown {
-        @Test public void request_constructor() {}
-        @Test public void response_constructor() {}
+        @Test public void request_constructor() {
+            int playerId = 5;
+            int wager = 40;
+            Message.DoubleDown.Request request = new Message.DoubleDown.Request(playerId, wager);
+
+            Assertions.assertEquals(playerId, request.getPlayerId());
+            Assertions.assertEquals(wager, request.getWager());
+        }
+        @Test public void response_constructor() {
+            int wager = 30;
+            Message.DoubleDown.Response response = new Message.DoubleDown.Response(wager, true);
+            Assertions.assertEquals(wager, response.getWager());
+            Assertions.assertTrue(response.getStatus());
+        }
     }
 
     @Nested
