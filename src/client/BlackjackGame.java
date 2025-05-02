@@ -195,5 +195,11 @@ public class BlackjackGame {
             playerLobby = new PlayerLobbyBlackJack();
             playerLobby.setVisible(true);
         });
+      
+//        javax.swing.SwingUtilities.invokeLater(() -> {
+//            BlackjackIntroGUI game = new BlackjackIntroGUI();
+//            game.show();
+//        });
+
     }
 }

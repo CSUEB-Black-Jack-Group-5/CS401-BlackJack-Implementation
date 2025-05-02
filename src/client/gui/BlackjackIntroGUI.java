@@ -1,6 +1,10 @@
 package client.gui;
 
+
 import client.DealerLobbyGUI.DealerLobbyBlackJack;
+
+import client.ClientWithHooks;
+
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,6 +19,7 @@ public class BlackjackIntroGUI extends Component {
     private Random random = new Random();
     private JFrame frame;
     private BlackjackPanel panel;
+    private ClientWithHooks client;
 
     /// Constants
     public static final Color DARK_GREEN = new Color(0, 100, 0);
@@ -22,7 +27,7 @@ public class BlackjackIntroGUI extends Component {
     public static final Color BUTTON_COLOR = new Color(139, 0, 0);
     public static final Color HOVER_COLOR = new Color(178, 34, 34);
 
-    public BlackjackIntroGUI() {
+    public BlackjackIntroGUI(ClientWithHooks client) {
         ///  title
         frame = new JFrame("Blackjack - Group5 Casino");
         frame.setSize(800, 600);
@@ -33,6 +38,7 @@ public class BlackjackIntroGUI extends Component {
         /// Set up the content pane with a custom panel
         panel = new BlackjackPanel(this);
         frame.setContentPane(panel);
+        this.client = client;
 
         /// Start the card animation
         startCardAnimation();
@@ -69,7 +75,8 @@ public class BlackjackIntroGUI extends Component {
 
     ///  Method for showing login GUI
     public void showLoginGUI() {
-        LoginGUI loginGUI = new LoginGUI(frame);
+
+        LoginGUI loginGUI = new LoginGUI(frame,client);
         loginGUI.setVisible(true);
 
         /// Login check popup window successful result
