@@ -19,21 +19,10 @@ public class ClientMain {
 
         SwingUtilities.invokeLater(() -> {
             client = new ClientWithHooks("localhost", 3333);
-            client.addMessageHook(Message.Login.Response.class, (res) -> {
-                if(res.getStatus()){
-                    System.out.println("Logged in! YAY");
-                    System.out.println("Account type: " + res.getType());
-                }
-                else {
-                    System.out.println("Login failed");
-                }
-
-            });
             GUI = new BlackjackIntroGUI(client);
             GUI.show();
         });
 
-//             GUI.close();                          // close the login gui (we're done with it)
 //             switch (res.getType()) {
 //                 case DEALER: {
 //                     client.addMessageHook(Message.Leave.Response.class, (res) -> {});

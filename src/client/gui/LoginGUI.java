@@ -20,6 +20,7 @@ public class LoginGUI extends JDialog {
         super(parent, "Blackjack Login", true);
 
         this.client = client;
+
         /// Panel for UI
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(new Color(30, 30, 30));
@@ -130,18 +131,20 @@ public class LoginGUI extends JDialog {
         /// check login
         loginButton.addActionListener(e -> {
             attemptLogin(getUsername(),getPassword());
-//            if (authenticate(getUsername(), getPassword())) {
-//                succeeded = true;
-//                dispose();
-//            } else {
-//                JOptionPane.showMessageDialog(LoginGUI.this,
-//                        "Invalid username or password",
-//                        "Login Failed",
-//                        JOptionPane.ERROR_MESSAGE);
-//                usernameField.setText("");
-//                passwordField.setText("");
-//                succeeded = false;
-//            }
+            client.addMessageHook(Message.Login.Response.class, (res) -> {
+                if (res.getStatus()) {
+                    System.out.println("Login successful");
+                    setLoginStatus(true);
+                } else {
+                    System.out.println("Login failed");
+                    setLoginStatus(false);
+                    SwingUtilities.invokeLater(() -> {
+                        JOptionPane.showMessageDialog(this, "Login failed. Try again.");
+                    });
+                }
+                // close login window
+                dispose();
+            });
         });
 
         /// Cancel Button
@@ -230,13 +233,13 @@ public class LoginGUI extends JDialog {
         client.sendNetworkMessage(new Message.Login.Request(username,password));
         //return  username.equals("Group5") && password.equals("something you want");
     }
-    public void setLoginSuccess(boolean success){
+
+    public void setLoginStatus(boolean success){
         this.succeeded = success;
     }
     public boolean getLoginRes(){
         return succeeded;
     }
-    // this gets text from input field
     public String getUsername() {
         return usernameField.getText();
     }
