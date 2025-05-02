@@ -37,8 +37,6 @@ public class CSVDatabaseHelper {
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
                 String[] dbLineContent = line.split(",");
-                System.out.println("Inside playerExists: "+dbLineContent[0].equals(username) + " " + dbLineContent[1].equals(password));
-                System.out.println("Inside playerExists: "+dbLineContent[0].equals(username) + " " + dbLineContent[1].equals(password));
                 if (dbLineContent.length > 0 && dbLineContent[0].equals(username) && dbLineContent[1].equals(password)) {
                     return true;
                 }
@@ -56,7 +54,6 @@ public class CSVDatabaseHelper {
             while(scanner.hasNextLine()) {
                 String line = scanner.nextLine();
                 String[] dbLineContent = line.split(",");
-                System.out.println("Inside dealerExists: "+dbLineContent[0] + " " + dbLineContent[1]);
                 if (dbLineContent.length > 0 && dbLineContent[0].equals(dealerName) && dbLineContent[1].equals(password)) {
                     return true;
                 }

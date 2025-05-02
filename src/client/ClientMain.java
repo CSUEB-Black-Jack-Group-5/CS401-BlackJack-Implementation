@@ -22,6 +22,7 @@ public class ClientMain {
             client.addMessageHook(Message.Login.Response.class, (res) -> {
                 if(res.getStatus()){
                     System.out.println("Logged in! YAY");
+                    System.out.println("Account type: " + res.getType());
                 }
                 else {
                     System.out.println("Login failed");

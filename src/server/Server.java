@@ -87,7 +87,6 @@ public class Server {
 
                         // Still have not done the checking still trying to figure out how to send the
                         // request via client side.
-                        System.out.println("checking username & password:" + username + " " + password);
                         if(CSVDatabaseHelper.dealerExists(username,password)){
                             accountType = AccountType.DEALER;
                         }
