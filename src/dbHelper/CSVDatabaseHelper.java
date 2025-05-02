@@ -12,7 +12,7 @@ public class CSVDatabaseHelper {
     // Synchronized method to add player to our "db"
     public synchronized static boolean addPlayer(String username, String password) {
 
-        if(playerExists(username))return false;
+        if(playerExists(username,password))return false;
 
 
         double startingFunds = 1000.0;
@@ -29,16 +29,17 @@ public class CSVDatabaseHelper {
         createPlayerFiles(username);
         return true;
     }
-
-    public static boolean playerExists(String username) {
+    // this does auth
+    public static boolean playerExists(String username,String password) {
         File file = new File(System.getProperty("user.dir") + "/res/db/allPlayers/allPlayers.csv");
 
         try (Scanner scanner = new Scanner(file)) {
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
-                String[] userName = line.split(",");
-
-                if (userName.length > 0 && userName[0].equals(username)) {
+                String[] dbLineContent = line.split(",");
+                System.out.println("Inside playerExists: "+dbLineContent[0].equals(username) + " " + dbLineContent[1].equals(password));
+                System.out.println("Inside playerExists: "+dbLineContent[0].equals(username) + " " + dbLineContent[1].equals(password));
+                if (dbLineContent.length > 0 && dbLineContent[0].equals(username) && dbLineContent[1].equals(password)) {
                     return true;
                 }
             }
@@ -49,13 +50,14 @@ public class CSVDatabaseHelper {
 
         return false;
     }
-    public static boolean dealerExists(String dealerName) {
+    public static boolean dealerExists(String dealerName,String password) {
         File file = new File(System.getProperty("user.dir") + "/res/db/allDealers.csv");
         try (Scanner scanner = new Scanner(file)){
             while(scanner.hasNextLine()) {
                 String line = scanner.nextLine();
-                String[] userName = line.split(",");
-                if (userName.length > 0 && userName[0].equals(dealerName)) {
+                String[] dbLineContent = line.split(",");
+                System.out.println("Inside dealerExists: "+dbLineContent[0] + " " + dbLineContent[1]);
+                if (dbLineContent.length > 0 && dbLineContent[0].equals(dealerName) && dbLineContent[1].equals(password)) {
                     return true;
                 }
             }
