@@ -27,11 +27,11 @@ public class PlayerLobbyBlackJack extends JFrame {
 
     public PlayerLobbyBlackJack() {
         /// Initialize tables data
-//        tables = new ArrayList<>();
-//        tables.add(new GuiTable(1, 0, 6));
-//        tables.add(new GuiTable(2, 4, 6));
-//        tables.add(new GuiTable(3, 3, 6));
-//        tables.add(new GuiTable(4, 6, 6));
+        tables = new ArrayList<>();
+        tables.add(new GuiTable(1, 0, 6));
+        tables.add(new GuiTable(2, 4, 6));
+        tables.add(new GuiTable(3, 3, 6));
+        tables.add(new GuiTable(4, 6, 6));
 
         /// Set up the frame
         setTitle("Player Lobby");
