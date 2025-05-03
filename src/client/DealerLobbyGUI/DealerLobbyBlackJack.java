@@ -32,10 +32,10 @@ public class DealerLobbyBlackJack extends JFrame {
     public DealerLobbyBlackJack() {
         /// Initialize tables data
         tables = new ArrayList<>();
-        tables.add(new GuiTable(1, 0, 6, "DealerName",1));
-        tables.add(new GuiTable(2, 4, 6, "DealerName",2));
-        tables.add(new GuiTable(3, 3, 6, "DealerName",3));
-        tables.add(new GuiTable(4, 6, 6, "DealerName",4));
+//        tables.add(new GuiTable(1, 0, 6, "DealerName",1));
+//        tables.add(new GuiTable(2, 4, 6, "DealerName",2));
+//        tables.add(new GuiTable(3, 3, 6, "DealerName",3));
+//        tables.add(new GuiTable(4, 6, 6, "DealerName",4));
 
         /// Set up the frame
         setTitle("Dealer Lobby");

@@ -13,9 +13,9 @@ public class TableTests {
     static String username = "fwaffycafecat";
     static String password = "garbage_value";
     static Table table;
-    static Dealer dealer = new Dealer(username, password);
-    Dealer dealer1 = new Dealer("murderless_Crow", "testing5");
-    Dealer dealer2 = new Dealer("City_Escape", "supersonicspeed");
+    static Dealer dealer = new Dealer(username, password,17);
+    Dealer dealer1 = new Dealer("murderless_Crow", "testing5",17);
+    Dealer dealer2 = new Dealer("City_Escape", "supersonicspeed",12);
     Player user1 = new Player("void_stranger", "0");
     Player user2 = new Player("layer_cake", "1");
     Player user3 = new Player("gloam_valley", "2");
