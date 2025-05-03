@@ -1,6 +1,10 @@
 package client.gui;
 
+
+import client.DealerLobbyGUI.DealerLobbyBlackJack;
+
 import client.ClientWithHooks;
+
 
 import javax.swing.*;
 import java.awt.*;
@@ -77,9 +81,8 @@ public class BlackjackIntroGUI extends Component {
 
         /// Login check popup window successful result
         if (loginGUI.isSucceeded()) {
-            JOptionPane.showMessageDialog(frame,
-                    "Welcome, " + loginGUI.getUsername() + "! Game is starting...",
-                    "Login Successful", JOptionPane.INFORMATION_MESSAGE);
+            frame.dispose();
+
         }
     }
 }
