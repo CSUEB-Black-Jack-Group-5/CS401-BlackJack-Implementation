@@ -1,8 +1,5 @@
 package game;
 
-import java.io.*;
-import java.nio.file.*;
-
 public class Player {
     private static int idCount = 0;
     private int playerId;
