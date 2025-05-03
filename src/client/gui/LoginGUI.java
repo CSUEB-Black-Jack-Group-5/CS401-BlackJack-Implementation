@@ -1,10 +1,20 @@
 package client.gui;
 ///  Login GUI
 
+
+import client.BlackjackGame;
+
+import client.ClientWithHooks;
+
+import networking.Message;
+
 import javax.swing.*;
-import javax.swing.border.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class LoginGUI extends JDialog {
     private JTextField usernameField;
@@ -12,9 +22,11 @@ public class LoginGUI extends JDialog {
     private JButton loginButton;
     private JButton cancelButton;
     private boolean succeeded;
-
-    public LoginGUI(Frame parent) {
+    private ClientWithHooks client;
+    public LoginGUI(Frame parent,ClientWithHooks client) {
         super(parent, "Blackjack Login", true);
+
+        this.client = client;
 
         /// Panel for UI
         JPanel panel = new JPanel(new BorderLayout());
@@ -124,19 +136,29 @@ public class LoginGUI extends JDialog {
         });
 
         /// check login
-        loginButton.addActionListener(e -> {
-            if (authenticate(getUsername(), getPassword())) {
-                succeeded = true;
-                dispose();
-            } else {
-                JOptionPane.showMessageDialog(LoginGUI.this,
-                        "Invalid username or password",
-                        "Login Failed",
-                        JOptionPane.ERROR_MESSAGE);
-                usernameField.setText("");
-                passwordField.setText("");
-                succeeded = false;
+
+        loginButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                handleLogin();
             }
+
+//         loginButton.addActionListener(e -> {
+//             attemptLogin(getUsername(),getPassword());
+//             client.addMessageHook(Message.Login.Response.class, (res) -> {
+//                 if (res.getStatus()) {
+//                     System.out.println("Login successful");
+//                     setLoginStatus(true);
+//                 } else {
+//                     System.out.println("Login failed");
+//                     setLoginStatus(false);
+//                     SwingUtilities.invokeLater(() -> {
+//                         JOptionPane.showMessageDialog(this, "Login failed. Try again.");
+//                     });
+//                 }
+//                 // close login window
+//                 dispose();
+//             });
+
         });
 
         /// Cancel Button
@@ -216,12 +238,60 @@ public class LoginGUI extends JDialog {
     }
 
     private boolean authenticate(String username, String password) {
+        /// Send login request to the server
+        if (BlackjackGame.client != null) {
+            Message.Login.Request loginRequest = new Message.Login.Request(username, password);
+            BlackjackGame.client.sendNetworkMessage(loginRequest);
+            return true;
+        }
+        return false;
+    }
+
+    private void handleLogin() {
+        String username = getUsername();
+        String password = getPassword();
+
+        if (username.trim().isEmpty() || password.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(LoginGUI.this,
+                    "Please enter username and password",
+                    "Account Login",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (authenticate(username, password)) {
+            /// We'll get the real result from the server response
+            succeeded = true;
+            dispose();
+        } else {
+            JOptionPane.showMessageDialog(LoginGUI.this,
+                    "Failed to connect to server",
+                    "Login Error",
+                    JOptionPane.ERROR_MESSAGE);
+            // Reset password field
+            passwordField.setText("");
+            succeeded = false;
+        }
+    }
+
+    // we ask the server if the user exists.
+    // through message login request
+    private void attemptLogin(String username, String password) {
+
         ///  I think we need database to use for username and password
         ///  At this i'll set the password is "something you want"
         ///  And username gonna be "Group 5 - BlackJack"
-        return  username.equals("Group5") && password.equals("something you want");
+        client.sendNetworkMessage(new Message.Login.Request(username,password));
+        //return  username.equals("Group5") && password.equals("something you want");
+
     }
 
+    public void setLoginStatus(boolean success){
+        this.succeeded = success;
+    }
+    public boolean getLoginRes(){
+        return succeeded;
+    }
     public String getUsername() {
         return usernameField.getText();
     }

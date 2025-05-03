@@ -43,6 +43,15 @@ public class Player {
     }
 
     public void doubleDown(Card card) {
+
+    public boolean split() {
+        if (!hand.checkSplit()) return false;
+        splitHand.addCard(this.hand.getAndRemoveSplitCard());
+        return true;
+    }
+
+    public void doubleDown() {
+
         wallet.removeFunds(-wager);
         wager *= 2;
         hit(card); // Player automatically draws one card

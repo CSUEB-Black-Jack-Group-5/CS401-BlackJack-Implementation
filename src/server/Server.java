@@ -1,6 +1,6 @@
 package server;
 
-import game.AccountType;
+import networking.AccountType;
 import networking.Message;
 
 import java.io.IOException;
@@ -9,6 +9,7 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
+import dbHelper.CSVDatabaseHelper;
 
 public class Server {
     // Client threads
@@ -22,7 +23,7 @@ public class Server {
     private final TableThread[] tables;
     private int tablesSize;
 
-    // private Database db;
+    private CSVDatabaseHelper db;
 
     ServerSocket serverSocket;
     int port;
@@ -41,6 +42,7 @@ public class Server {
         ObjectInputStream reader;
         ObjectOutputStream writer;
         Server serverRef;
+        AccountType accountType;
         public ClientLoginHandler(Socket socket, Server serverRef) {
             this.socket = socket;
             this.serverRef = serverRef;
@@ -55,6 +57,8 @@ public class Server {
 
         @Override
         public void run() {
+            // system.out
+            System.out.println("Server listening on port 3333");
             try {
                 Message message;
                 while ((message = (Message) reader.readObject()) != null) {
@@ -81,15 +85,28 @@ public class Server {
                         String username = loginRequest.getUsername();
                         String password = loginRequest.getPassword();
 
+                        // Still have not done the checking still trying to figure out how to send the
+                        // request via client side.
+                        if(CSVDatabaseHelper.dealerExists(username,password)){
+                            accountType = AccountType.DEALER;
+                        }
+                        else if(CSVDatabaseHelper.playerExists(username,password)){
+                            accountType = AccountType.PLAYER;
+                        }
+                        if (accountType == null) {
+                            writer.writeObject(new Message.Login.Response(false, null));
+                            return;
+                        }
                         // TODO: if (!checkCredentials(username, password))
                         //          writer.writeObject(Message.Login.Response(/* fail status */));
                         // TODO: AccountType accountType = serverRef.db.getUserTypeFor(username);
-                        AccountType accountType = AccountType.Player;
+//                        AccountType accountType = AccountType.PLAYER;
                         ClientThreadWithHooks clientThread = switch (accountType) {
-                            case AccountType.Player -> new PlayerClientThread(socket, serverRef, writer, reader);
-                            case AccountType.Dealer -> new DealerClientThread(socket, serverRef, writer, reader);
+                            case AccountType.PLAYER -> new PlayerClientThread(socket, serverRef, writer, reader);
+                            case AccountType.DEALER -> new DealerClientThread(socket, serverRef, writer, reader);
                         };
                         writer.writeObject(new Message.Login.Response(true, accountType));
+
                         connectedClients[connectClientsSize++] = clientThread;
                         clientsInLobby[clientsInLobbySize++] = clientThread;
                         new Thread(clientThread).start();
