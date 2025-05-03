@@ -24,7 +24,7 @@ public class BlackjackGame {
             setupMessageHooks();
 
             // Create and show the intro GUI
-            introGUI = new BlackjackIntroGUI();
+            introGUI = new BlackjackIntroGUI(client);
             introGUI.setVisible(true);
         });
     }

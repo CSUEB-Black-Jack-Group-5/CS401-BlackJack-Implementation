@@ -6,12 +6,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
+import client.BlackjackGame;
 import client.ClientMain;
 import networking.Message;
 import networking.AccountType;
 
 public class PlayerLobbyBlackJackPanel extends JPanel {
-    private ArrayList<PlayerLobbyBlackJack.Table> tables;
+    private ArrayList<PlayerLobbyBlackJack.GuiTable> tables;
     private JPanel tablesPanel;
     private int playerId;
     private String playerName;
@@ -21,7 +22,7 @@ public class PlayerLobbyBlackJackPanel extends JPanel {
     private Color feltGreen = new Color(0, 102, 0); // Brighter green like in the image
     private Color feltPatternColor = new Color(0, 85, 0); // Slightly darker green for pattern
 
-    public PlayerLobbyBlackJackPanel(ArrayList<PlayerLobbyBlackJack.Table> tables) {
+    public PlayerLobbyBlackJackPanel(ArrayList<PlayerLobbyBlackJack.GuiTable> tables) {
         this.tables = tables;
         this.playerId = playerId;
         this.playerName = playerName;
@@ -37,7 +38,7 @@ public class PlayerLobbyBlackJackPanel extends JPanel {
     /// Method to request lobby data from server
     private void requestLobbyData() {
         Message.LobbyData.Request request = new Message.LobbyData.Request(playerId, AccountType.PLAYER);
-        ClientMain.client.sendNetworkMessage(request);
+        BlackjackGame.client.sendNetworkMessage(request);
     }
 
     ///  Method to update UI with lobby data received from server
@@ -140,7 +141,7 @@ public class PlayerLobbyBlackJackPanel extends JPanel {
         tablesPanel.removeAll();
 
         for (int i = 0; i < tables.size(); i++) {
-            PlayerLobbyBlackJack.Table table = tables.get(i);
+            PlayerLobbyBlackJack.GuiTable table = tables.get(i);
             JPanel tablePanel = createTablePanel(table, i);
             tablesPanel.add(tablePanel);
         }
@@ -149,7 +150,7 @@ public class PlayerLobbyBlackJackPanel extends JPanel {
         tablesPanel.repaint();
     }
 
-    private JPanel createTablePanel(final PlayerLobbyBlackJack.Table table, final int index) {
+    private JPanel createTablePanel(final PlayerLobbyBlackJack.GuiTable table, final int index) {
 
         /// Create a rounded panel for each table
         final RoundedPanelPlayerLobby panel = new RoundedPanelPlayerLobby(15);
@@ -237,7 +238,7 @@ public class PlayerLobbyBlackJackPanel extends JPanel {
         return panel;
     }
 
-    private void joinTable(PlayerLobbyBlackJack.Table table) {
+    private void joinTable(PlayerLobbyBlackJack.GuiTable table) {
         /// Check if table is full
         if (table.occupancy >= table.maxPlayers) {
             JOptionPane.showMessageDialog(this,
@@ -251,14 +252,14 @@ public class PlayerLobbyBlackJackPanel extends JPanel {
         // Send join table request to server
         currentTableId = table.id; /// Store the table ID for the response
         Message.JoinTable.Request request = new Message.JoinTable.Request(playerId, table.id);
-        ClientMain.client.sendNetworkMessage(request);
+        BlackjackGame.client.sendNetworkMessage(request);
     }
 
     /// Method to handle join table response
     public void handleJoinTableResponse(Message.JoinTable.Response response, int tableId) {
         if (response.getStatus()) {
             /// Find the table and update its occupancy
-            for (PlayerLobbyBlackJack.Table table : tables) {
+            for (PlayerLobbyBlackJack.GuiTable table : tables) {
                 if (table.id == tableId) {
                     table.occupancy++;
                     break;

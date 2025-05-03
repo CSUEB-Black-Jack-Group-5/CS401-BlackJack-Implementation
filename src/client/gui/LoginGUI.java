@@ -272,6 +272,7 @@ public class LoginGUI extends JDialog {
             passwordField.setText("");
             succeeded = false;
         }
+    }
 
     // we ask the server if the user exists.
     // through message login request

@@ -1,9 +1,9 @@
 package client.DealerLobbyGUI;
 
+import client.BlackjackGame;
 import client.ClientMain;
 import networking.AccountType;
 import networking.Message;
-import game.Table;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,7 +12,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 public class DealerLobbyBlackJackPanel extends JPanel {
-    private ArrayList<DealerLobbyBlackJack.Table> tables;
+    private ArrayList<DealerLobbyBlackJack.GuiTable> GUItables;
     private JPanel tablesPanel;
     private JLabel dealerCountLabel;
     private JLabel playerCountLabel;
@@ -23,8 +23,8 @@ public class DealerLobbyBlackJackPanel extends JPanel {
     private Color feltGreen = new Color(0, 102, 0); // Brighter green like in the image
     private Color feltPatternColor = new Color(0, 85, 0); // Slightly darker green for pattern
 
-    public DealerLobbyBlackJackPanel(ArrayList<DealerLobbyBlackJack.Table> tables) {
-        this.tables = tables;
+    public DealerLobbyBlackJackPanel(ArrayList<DealerLobbyBlackJack.GuiTable> tables) {
+        this.GUItables = tables;
         setLayout(new BorderLayout());
         setBackground(feltGreen);
 
@@ -38,7 +38,7 @@ public class DealerLobbyBlackJackPanel extends JPanel {
     ///  Request Lobby Data
     private void requestLobbyData() {
         Message.LobbyData.Request request = new Message.LobbyData.Request(dealerId, AccountType.DEALER);
-        ClientMain.client.sendNetworkMessage(request);
+        BlackjackGame.client.sendNetworkMessage(request);
     }
 
     ///  Update UI with the lobby data when get the response back from server
@@ -187,7 +187,7 @@ public class DealerLobbyBlackJackPanel extends JPanel {
     private void refreshTablesList() {
         tablesPanel.removeAll();
 
-        for (DealerLobbyBlackJack.Table table : tables) {
+        for (DealerLobbyBlackJack.GuiTable table : GUItables) {
             JPanel tablePanel = createTablePanel(table);
             tablesPanel.add(tablePanel);
         }
@@ -196,11 +196,11 @@ public class DealerLobbyBlackJackPanel extends JPanel {
         tablesPanel.repaint();
 
         /// Update counts
-        dealerCountLabel.setText("Total of dealers: " + tables.size());
+        dealerCountLabel.setText("Total of dealers: " + GUItables.size());
         playerCountLabel.setText("Total of players: " + countTotalPlayers());
     }
 
-    private JPanel createTablePanel(DealerLobbyBlackJack.Table table) {
+    private JPanel createTablePanel(DealerLobbyBlackJack.GuiTable table) {
         /// Create a rounded panel for each table
         RoundedPanelDealerLobby panel = new RoundedPanelDealerLobby(15);
 
@@ -250,7 +250,7 @@ public class DealerLobbyBlackJackPanel extends JPanel {
 
     private void createNewTable() {
         Message.CreateTable.Request request = new Message.CreateTable.Request(dealerName);
-        ClientMain.client.sendNetworkMessage(request);
+        BlackjackGame.client.sendNetworkMessage(request);
     }
 
     /// Method to handle create table response

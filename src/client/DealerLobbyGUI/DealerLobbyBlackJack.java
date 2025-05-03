@@ -1,5 +1,6 @@
 package client.DealerLobbyGUI;
 
+import client.BlackjackGame;
 import client.ClientMain;
 import networking.AccountType;
 import networking.Message;
@@ -8,24 +9,24 @@ import javax.swing.*;
 import java.util.ArrayList;
 
 public class DealerLobbyBlackJack extends JFrame {
-    private ArrayList<Table> tables;
+//    private ArrayList<Table> tables;
     private DealerLobbyBlackJackPanel dealerLobbyBlackJackPanel;
 
-//    public static class Table {
-//        int id;
-//        public int occupancy;
-//        int maxPlayers;
-//        String dealerName;
-//        private int dealerId;
+    public static class GuiTable {
+        int id;
+        public int occupancy;
+        int maxPlayers;
+        String dealerName;
+        private int dealerId;
 //
-//        public Table(int id, int occupancy, int maxPlayers, String dealerName, int dealerId) {
-//            this.id = id;
-//            this.occupancy = occupancy;
-//            this.maxPlayers = maxPlayers;
-//            this.dealerName = dealerName;
-//            this.dealerId = dealerId;
-//        }
-//    }
+        public GuiTable(int id, int occupancy, int maxPlayers, String dealerName, int dealerId) {
+            this.id = id;
+            this.occupancy = occupancy;
+            this.maxPlayers = maxPlayers;
+            this.dealerName = dealerName;
+            this.dealerId = dealerId;
+        }
+    }
 
     public DealerLobbyBlackJack() {
         /// Initialize tables data
@@ -42,7 +43,7 @@ public class DealerLobbyBlackJack extends JFrame {
         setLocationRelativeTo(null);
 
         /// Create the lobby panel and set it as the content pane
-        dealerLobbyBlackJackPanel = new DealerLobbyBlackJackPanel(tables);
+//        dealerLobbyBlackJackPanel = new DealerLobbyBlackJackPanel(1);
         setContentPane(dealerLobbyBlackJackPanel);
 
         /// Set up message hooks to handle server responses
@@ -55,20 +56,20 @@ public class DealerLobbyBlackJack extends JFrame {
 
     private void setupMessageHooks() {
         /// Hook for lobby data response
-        ClientMain.client.addMessageHook(Message.LobbyData.Response.class, response -> {
+        BlackjackGame.client.addMessageHook(Message.LobbyData.Response.class, response -> {
             Message.LobbyData.Response lobbyDataResponse = (Message.LobbyData.Response) response;
             dealerLobbyBlackJackPanel.updateLobbyData(lobbyDataResponse);
         });
 
         /// Hook for create table response
-        ClientMain.client.addMessageHook(Message.CreateTable.Response.class, response -> {
+        BlackjackGame.client.addMessageHook(Message.CreateTable.Response.class, response -> {
             Message.CreateTable.Response createTableResponse = (Message.CreateTable.Response) response;
             dealerLobbyBlackJackPanel.handleCreateTableResponse(createTableResponse);
         });
     }
 
     private void requestLobbyData() {
-        Message.LobbyData.Request request = new Message.LobbyData.Request(dealerId, AccountType.DEALER);
-        ClientMain.client.sendNetworkMessage(request);
+        Message.LobbyData.Request request = new Message.LobbyData.Request(0, AccountType.DEALER);
+        BlackjackGame.client.sendNetworkMessage(request);
     }
 }
