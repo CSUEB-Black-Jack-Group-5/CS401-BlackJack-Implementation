@@ -152,6 +152,8 @@ public class Player {
 
     public int getWins() { return wins; }
 
+    public String getUsername() { return username; }
+
     public int getLosses() { return losses; }
 
     public void incrementWins() {
