@@ -2,6 +2,7 @@ package client.DealerLobbyGUI;
 
 import client.BlackjackGame;
 import client.ClientMain;
+import game.Table;
 import networking.AccountType;
 import networking.Message;
 
@@ -52,6 +53,25 @@ public class DealerLobbyBlackJackPanel extends JPanel {
         playerCountLabel.setText("Total of players: " + totalPlayers);
 
         ///  Because we don't have Table yet so i put it right here so can you guys depend on it to create table
+        Table[] responseTables = response.getTables();
+        tablesPanel.removeAll();
+        System.out.println(responseTables.length);
+        GUItables.clear();
+        for (int i = 0; i < responseTables.length; i++) {
+            Table table = responseTables[i];
+            if (table == null) {
+                System.err.println("Table in LobbyData response null");
+                continue;
+            }
+            DealerLobbyBlackJack.GuiTable guiTable = new DealerLobbyBlackJack.GuiTable(
+                    table.getTableId(),
+                    table.getPlayerCount(),
+                    table.getPlayerLimit(),
+                    table.getDealer().getUsername(),
+                    table.getDealer().getDealerId()
+            );
+            GUItables.add(guiTable);
+        }
 //       if (response.getTables() != null) {
 //            /// Clear current tables and add new ones from response
 //            tables.clear();
@@ -187,7 +207,9 @@ public class DealerLobbyBlackJackPanel extends JPanel {
     }
 
     private void refreshTablesList() {
+        // GUItables.clear();
         tablesPanel.removeAll();
+        System.out.println("GUITables size: " + GUItables.size());
 
         for (DealerLobbyBlackJack.GuiTable table : GUItables) {
             JPanel tablePanel = createTablePanel(table);
@@ -251,6 +273,7 @@ public class DealerLobbyBlackJackPanel extends JPanel {
     }
 
     private void createNewTable() {
+        System.out.println("Create table clicked");
         Message.CreateTable.Request request = new Message.CreateTable.Request(dealerName);
         BlackjackGame.client.sendNetworkMessage(request);
     }
@@ -261,7 +284,7 @@ public class DealerLobbyBlackJackPanel extends JPanel {
             if (response.getStatus()) {
                 int newTableId = response.getTableId();
                 ///  add later
-//                tables.add(new DealerLobbyBlackJack.Table(newTableId, 0, 6, dealerName));
+                GUItables.add(new DealerLobbyBlackJack.GuiTable(newTableId, 0, 6, dealerName, 1));
                 refreshTablesList();
 
                 /// After creating a table, request updated lobby data
