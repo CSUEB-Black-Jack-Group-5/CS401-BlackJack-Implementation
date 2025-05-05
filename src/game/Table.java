@@ -1,12 +1,13 @@
 package game;
 
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Table {
+public class Table implements Serializable {
     protected static int idCount = 0;
     private int tableId;
     private Dealer dealer;
@@ -25,9 +26,8 @@ public class Table {
     // maybe flag in the dealer class that triggers if they have a table open already?
     // actually i don't even know if we want this feature ^^ we'll deal with it later if we do want this
     /* CONSTRUCTOR */
-    public Table(Dealer dealer){
+    public Table(){
         this.tableId = idCount++;
-        this.dealer = dealer;
         this.players = new Player[PLAYER_LIMIT];
         this.playerCount = 0;
         this.turnTimer = new Timer(60);
@@ -63,6 +63,10 @@ public class Table {
     // checks if the table is in a game
     public boolean isActive() {
         return this.isActive;
+    }
+
+    public void setDealer(Dealer dealer) {
+        this.dealer = dealer;
     }
 
     /* CHECKS IF THE TABLE IS FULL */
@@ -225,8 +229,13 @@ public class Table {
     // returns the current state of the table
     // INSERT FORMAT HERE
     public String toString() {
-        String data = "Table Id: " + this.tableId + "\nDealer: " +
-                this.dealer.getUsername() + "\nPlayers:\n";
+        String data = "Table Id: " + this.tableId + "\nDealer: ";
+        if (dealer != null) {
+            data += this.dealer.getUsername();
+        } else {
+            data += "NONE";
+        }
+        data += "\nPlayers:\n";
         if (playerCount == 0) {
             data += "NONE\n";
         } else {

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 import client.BlackjackGame;
 import client.ClientMain;
+import game.Table;
 import networking.Message;
 import networking.AccountType;
 
@@ -44,25 +45,29 @@ public class PlayerLobbyBlackJackPanel extends JPanel {
     ///  Method to update UI with lobby data received from server
     public void updateLobbyData(Message.LobbyData.Response response) {
         /// Update tables
-//       SwingUtilities.invokeLater(() -> {
-//            /// Update tables if necessary
-//            if (response.getTables() != null) {
-//                // Clear current tables and add new ones from response
-//                tables.clear();
-//                for (Message.Table table : response.getTables()) {
-//                    // Convert network table to GUI table
-//                    tables.add(new PlayerLobbyBlackJack.Table(
-//                        table.getId(),
-//                        table.getOccupancy(),
-//                        table.getMaxPlayers(),
-//                        table.getDealerName()
-//                    ));
-//                }
+        SwingUtilities.invokeLater(() -> {
+            /// Update tables if necessary
+            if (response.getTables() != null || response.getTables().length != 0) {
+                // Clear current tables and add new ones from response
+                tables.clear();
 
-        /// Refresh UI
-        refreshTablesList();
+                for (Table table : response.getTables()) {
+                    // Convert network table to GUI table
+                    tables.add(new PlayerLobbyBlackJack.GuiTable(
+                            table.getTableId(),
+                            table.getPlayerCount(),
+                            table.getPlayerLimit()//,
+                            // table.getDealer().getUsername()
+                    ));
+                }
 
+                /// Refresh UI
+                refreshTablesList();
+
+            }
+        });
     }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -256,8 +261,10 @@ public class PlayerLobbyBlackJackPanel extends JPanel {
     }
 
     /// Method to handle join table response
-    public void handleJoinTableResponse(Message.JoinTable.Response response, int tableId) {
+    public void handleJoinTableResponse(Message.JoinTable.Response response) {
         if (response.getStatus()) {
+            int tableId = response.getTableId();
+
             /// Find the table and update its occupancy
             for (PlayerLobbyBlackJack.GuiTable table : tables) {
                 if (table.id == tableId) {

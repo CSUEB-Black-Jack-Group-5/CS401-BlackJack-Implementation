@@ -1,8 +1,11 @@
 package client;
 
+import client.PlayerTable.PlayerTableBlackJack;
 import client.gui.BlackjackIntroGUI;
 import client.DealerLobbyGUI.DealerLobbyBlackJack;
 import client.PlayerLobbyGUI.PlayerLobbyBlackJack;
+import client.DealerTable.DealerTableBlackJack;
+import client.PlayerTable.PlayerTableBlackJack;
 import networking.AccountType;
 import networking.Message;
 
@@ -14,6 +17,8 @@ public class BlackjackGame {
     static BlackjackIntroGUI introGUI;
     static PlayerLobbyBlackJack playerLobby;
     static DealerLobbyBlackJack dealerLobby;
+    static PlayerTableBlackJack playerTable;
+    static DealerTableBlackJack dealerTable;
 
     public static void main(String[] args) {
         javax.swing.SwingUtilities.invokeLater(() -> {
@@ -95,8 +100,28 @@ public class BlackjackGame {
     }
 
     private static void setupDealerHooks() {
+
         client.addMessageHook(Message.CreateTable.Response.class, (res) -> {
             System.out.println("CreateTable Response");
+
+            // Handle create table response
+            Message.CreateTable.Response createTableResponse = (Message.CreateTable.Response) res;
+            dealerLobby.getDealerLobbyBlackJackPanel().handleCreateTableResponse(createTableResponse);
+
+            // Join the table just created
+            int tableId = res.getTableId();
+            String dealerName = res.getDealerUsername();
+            int occupancy = res.getPlayerCount();
+            int maxPlayers = res.getPlayerLimit();
+            dealerTable = new DealerTableBlackJack(tableId, dealerName, occupancy, maxPlayers);
+
+            // Hide the Dealer Lobby GUI if it's still visible
+            if (dealerLobby != null && dealerLobby.isVisible()) {
+                dealerLobby.setVisible(false);
+            }
+
+            // Show dealer table
+            dealerTable.setVisible(true);
         });
 
         client.addMessageHook(Message.Stand.Response.class, (res) -> {
@@ -105,7 +130,9 @@ public class BlackjackGame {
 
         client.addMessageHook(Message.LobbyData.Response.class, (res) -> {
             System.out.println("Lobby data Response");
+            Message.LobbyData.Response lobbyDataResponse = (Message.LobbyData.Response) res;
             // Handle lobby data response - update lobby UI
+            dealerLobby.getDealerLobbyBlackJackPanel().updateLobbyData(lobbyDataResponse);
         });
 
         client.addMessageHook(Message.GameData.Response.class, (res) -> {
@@ -122,12 +149,34 @@ public class BlackjackGame {
             System.out.println("TableData Response");
             // Handle table data response
         });
+
+        // lobby pane instantiated here to avoid null arguments when calling for lobby data
+        dealerLobby = new DealerLobbyBlackJack();
     }
 
     private static void setupPlayerHooks() {
         client.addMessageHook(Message.JoinTable.Response.class, (res) -> {
             System.out.println("JoinTable Response");
             // Handle join table response
+            Message.JoinTable.Response joinTableResponse = (Message.JoinTable.Response) res;
+            playerLobby.getPlayerLobbyBlackJackPanel().handleJoinTableResponse(joinTableResponse);
+
+            // Join the table requested
+            int tableId = res.getTableId();
+            String dealerName = res.getDealerUsername();
+            int playerPosition = res.getPlayerCount();
+            int occupancy = res.getPlayerCount();
+            int maxPlayers = res.getPlayerLimit();
+            String playerName = "dummy_value";
+            playerTable = new PlayerTableBlackJack(tableId, dealerName, playerPosition, occupancy, maxPlayers, playerName);
+
+            // Hide the Player Lobby GUI if it's still visible
+            if (playerLobby != null && playerLobby.isVisible()) {
+                playerLobby.setVisible(false);
+            }
+
+            // Show player table
+            playerTable.setVisible(true);
         });
 
         client.addMessageHook(Message.Hit.Response.class, (res) -> {
@@ -142,7 +191,9 @@ public class BlackjackGame {
 
         client.addMessageHook(Message.LobbyData.Response.class, (res) -> {
             System.out.println("Lobby data Response");
+            Message.LobbyData.Response lobbyDataResponse = (Message.LobbyData.Response) res;
             // Handle lobby data response - update lobby UI
+            playerLobby.getPlayerLobbyBlackJackPanel().updateLobbyData(lobbyDataResponse);
         });
 
         client.addMessageHook(Message.GameData.Response.class, (res) -> {
@@ -169,6 +220,9 @@ public class BlackjackGame {
             System.out.println("PlayerLeave Response");
             // Handle player leave response
         });
+
+        // lobby pane instantiated here to avoid null arguments when calling for lobby data
+        playerLobby = new PlayerLobbyBlackJack();
     }
 
     private static void showDealerGUI() {
@@ -179,7 +233,6 @@ public class BlackjackGame {
             }
 
             // Show dealer lobby
-            dealerLobby = new DealerLobbyBlackJack();
             dealerLobby.setVisible(true);
         });
     }
@@ -192,7 +245,6 @@ public class BlackjackGame {
             }
 
             // Show player lobby
-            playerLobby = new PlayerLobbyBlackJack();
             playerLobby.setVisible(true);
         });
       

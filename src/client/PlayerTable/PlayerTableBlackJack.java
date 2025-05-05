@@ -349,7 +349,7 @@ public class PlayerTableBlackJack extends JFrame {
     /// Calculate and set positions for players in a semi-circle
     private void positionPlayersInSemicircle(JPanel panel) {
         int playerCount = playerPositions.size();
-        int centerX = 450; // Center X coordinate
+        int centerX = 500; // Center X coordinate
         int centerY = 300; // Center Y coordinate
         int radius = 250;  // Radius of the semi-circle
 

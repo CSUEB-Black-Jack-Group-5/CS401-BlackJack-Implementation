@@ -1,5 +1,6 @@
 package server;
 
+import game.Player;
 import networking.AccountType;
 import networking.Message;
 
@@ -8,6 +9,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Arrays;
 import dbHelper.CSVDatabaseHelper;
 
@@ -20,7 +22,7 @@ public class Server {
 
     private Thread connectionThread;
 
-    private final TableThread[] tables;
+    private final ArrayList<TableThread> tables;
     private int tablesSize;
 
     private CSVDatabaseHelper db;
@@ -151,7 +153,7 @@ public class Server {
         clientsInLobby = new ClientThreadWithHooks[10];
         clientsInLobbySize = 0;
 
-        tables = new TableThread[10];
+        tables = new ArrayList<TableThread>();
         tablesSize = 0;
     }
     public void startServer() {
@@ -172,17 +174,26 @@ public class Server {
     public void disconnectServer() {}
 
     public TableThread[] getTables() {
-        return tables;
+        TableThread[] arr = new TableThread[tables.size()];
+        arr = tables.toArray(arr);
+        return arr;
     }
     public ClientThreadWithHooks[] getDealersInLobby() {
         return (ClientThreadWithHooks[]) Arrays.stream(clientsInLobby)
                 .filter(clientThreadWithHooks -> clientThreadWithHooks instanceof DealerClientThread)
                 .toArray();
     }
+    // figure out what's wrong later
     public ClientThreadWithHooks[] getPlayersInLobby() {
         return (ClientThreadWithHooks[]) Arrays.stream(clientsInLobby)
                 .filter(clientThreadWithHooks -> clientThreadWithHooks instanceof PlayerClientThread)
                 .toArray();
+    }
+    public int getConnectClientsSize() {
+        return connectClientsSize;
+    }
+    public int getClientsInLobbySize() {
+        return clientsInLobbySize;
     }
     // public Table getTableById(int tableId) {
     //     List<Table> filteredTables = Arrays.stream(tables).filter(tableThread -> tableThread.table.getTableId() == tableId).toList();
@@ -198,18 +209,23 @@ public class Server {
 
     //     return true;
     // }
-    public boolean movePlayerClientToTable(PlayerClientThread clientThread, int tableId) {
+    public boolean movePlayerClientToTable(PlayerClientThread clientThread, int tableId, Player player) {
         if (tableId < 0 || tableId >= tablesSize) {
             System.err.println("tableId = " + tableId + " doesn't exist");
             return false;
+        } else {
+            // table id's not the best for this tbh but whatever
+            tables.get(tableId).addClientToTable(clientThread);
+            tables.get(tableId).getTable().addPlayer(player);
         }
-        tables[tableId].addClientToTable(clientThread);
         return true;
     }
-    public void spawnTable() {
+    public TableThread spawnTable() {
         TableThread tableThread = new TableThread();
-        tables[tablesSize++] = tableThread;
+        tables.add(tableThread);
         new Thread(tableThread).start();
+        tablesSize++;
+        return tableThread;
     }
     public void broadcastNetworkMessageToTable(Message message) {
         for (ClientThreadWithHooks client : connectedClients) {

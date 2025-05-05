@@ -9,7 +9,7 @@ import javax.swing.*;
 import java.util.ArrayList;
 
 public class DealerLobbyBlackJack extends JFrame {
-//    private ArrayList<Table> tables;
+    private ArrayList<GuiTable> tables;
     private DealerLobbyBlackJackPanel dealerLobbyBlackJackPanel;
 
     public static class GuiTable {
@@ -30,7 +30,7 @@ public class DealerLobbyBlackJack extends JFrame {
 
     public DealerLobbyBlackJack() {
         /// Initialize tables data
-//        tables = new ArrayList<>();
+        tables = new ArrayList<>();
 //        tables.add(new Table(1, 0, 6, "DealerName",1));
 //        tables.add(new Table(2, 4, 6, "DealerName",2));
 //        tables.add(new Table(3, 3, 6, "DealerName",3));
@@ -43,7 +43,7 @@ public class DealerLobbyBlackJack extends JFrame {
         setLocationRelativeTo(null);
 
         /// Create the lobby panel and set it as the content pane
-//        dealerLobbyBlackJackPanel = new DealerLobbyBlackJackPanel(1);
+        dealerLobbyBlackJackPanel = new DealerLobbyBlackJackPanel(tables);
         setContentPane(dealerLobbyBlackJackPanel);
 
         /// Set up message hooks to handle server responses
@@ -54,6 +54,7 @@ public class DealerLobbyBlackJack extends JFrame {
 
     }
 
+    // i think you can remove these two message hooks since i hooked them up in BlackjackGame.java
     private void setupMessageHooks() {
         /// Hook for lobby data response
         BlackjackGame.client.addMessageHook(Message.LobbyData.Response.class, response -> {
@@ -71,5 +72,9 @@ public class DealerLobbyBlackJack extends JFrame {
     private void requestLobbyData() {
         Message.LobbyData.Request request = new Message.LobbyData.Request(0, AccountType.DEALER);
         BlackjackGame.client.sendNetworkMessage(request);
+    }
+
+    public DealerLobbyBlackJackPanel getDealerLobbyBlackJackPanel() {
+        return dealerLobbyBlackJackPanel;
     }
 }
