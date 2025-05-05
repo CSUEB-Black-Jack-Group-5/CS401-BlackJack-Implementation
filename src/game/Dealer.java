@@ -1,7 +1,8 @@
 package game;
 import java.util.List;
+import java.io.Serializable;
 
-public class Dealer {
+public class Dealer implements Serializable {
     private static int idCount = 0;
     private String username;
     private String password;

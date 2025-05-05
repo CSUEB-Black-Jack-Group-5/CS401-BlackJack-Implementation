@@ -1,12 +1,15 @@
 package game;
 
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class Table {
+public class Table implements Serializable {
     protected static int idCount = 0;
     private int tableId;
     private Dealer dealer;
@@ -18,7 +21,9 @@ public class Table {
     private LocalDateTime endTime;      // extrapolation from GameData class; not sure if needed
     private int timeLive;               // extrapolation from GameData class; not sure if needed
     private boolean isActive;           // this is a variable used to determine whether
-                                        // the table is within a game or not
+                                        // the table is within a game or no
+
+    private Map<String,CardHand>  mapOfHands;
     // thought it would be helpful for handling incoming connections during a game
 
     // how do we make sure that dealer only spawns one table?
@@ -33,6 +38,7 @@ public class Table {
         this.turnTimer = new Timer(60);
         this.startTime = LocalDateTime.now();
         this.isActive = false;
+        this.mapOfHands = new HashMap<>();
     }
 
     /* GETTERS */
@@ -194,8 +200,29 @@ public class Table {
         // resets the dealer's hand
         dealer.resetHand();
 
-        // not sure if i want to call shuffle at the end or not
+    }
 
+    public Map<String ,CardHand> getPlayerHands(){
+        return this.mapOfHands;
+    }
+
+    // rests table state
+    public void newRound(){
+        dealer.resetHand();
+        dealer.getShoe().shuffle();
+        mapOfHands.clear();
+    }
+
+    public void addPlayerHand(String userName, CardHand hand) {
+        mapOfHands.put(userName, hand);
+    }
+
+    public CardHand dealInitialCards(String userName) {
+        CardHand hand = new CardHand(21);
+        hand.addCard(dealer.getShoe().dealCard());
+        hand.addCard(dealer.getShoe().dealCard());
+        mapOfHands.put(userName, hand);
+        return hand;
     }
 
     /* IF DEALER LEAVES, CALL THIS METHOD TO LOG TABLE DATA */
@@ -218,6 +245,106 @@ public class Table {
         playerCount = 0;
         turnTimer.resetTimer();
         isActive = false;
+    }
+
+
+
+    // deal first two cards to dealer
+    public void dealInitialCardsToDealer(){
+        dealer.getHand().addCard(dealer.getShoe().dealCard());
+        dealer.getHand().addCard(dealer.getShoe().dealCard());
+    }
+
+    // player needs another card
+    public void hitPlayer(String userName){
+        CardHand hand = mapOfHands.get(userName);
+        hand.addCard(dealer.getShoe().dealCard());
+    }
+
+    // player is over 21
+    public boolean isPlayerBust(String userName){
+        CardHand hand = mapOfHands.get(userName);
+        return hand.bustCheck();
+    }
+
+    // player stood or is over 21
+    public boolean isPlayerDone(String userName){
+        CardHand hand = mapOfHands.get(userName);
+        return hand.isStanding() || hand.bustCheck();
+    }
+
+    // check if player can double down
+    public boolean canPlayerDouble(String userName){
+        CardHand hand = mapOfHands.get(userName);
+        return hand.getNumCards()==2;
+    }
+
+    // player wants to double down
+    public void doubleDownPlayer(String userName){
+        CardHand hand = mapOfHands.get(userName);
+        hand.addCard(dealer.getShoe().dealCard());
+        hand.setStanding(true);
+
+    }
+
+    public boolean canPlayerSplit(String userName){
+        CardHand hand = mapOfHands.get(userName);
+        return hand.checkSplit();
+    }
+
+    public void splitPlayer(String userName){
+
+
+        // Store original two cards first
+        CardHand hand = mapOfHands.get(userName);
+        CardHand hand2 = new CardHand(21);
+
+        Card firstCard = hand.getCard(0);
+        Card secondCard = hand.getCard(1);
+
+        // Create two new hands
+        hand = new CardHand(21);
+        hand.addCard(firstCard);
+
+        hand2.addCard(secondCard);
+
+        // remove player hand from map of hands
+        mapOfHands.remove(userName);
+
+        // give the player 2 hands
+        mapOfHands.put(userName, hand);
+        mapOfHands.put(userName,hand2);
+
+    }
+
+    // dealer hits until 17 or higher
+    public void playDealerHand() {
+
+        while (dealer.getHand().getTotalValue() < 17) {
+            dealer.getHand().addCard(dealer.getShoe().dealCard());
+        }
+    }
+    // evaluates all hands at the end
+    public Map<String, String> evaluateAllHands(){
+        int dealerValue = dealer.getHand().getTotalValue();
+        Map<String, String> res = new HashMap<>();
+        Player[] players = getPlayers();
+        for(int i = 0; i < players.length; i++){
+            String userName = players[i].getUsername();
+            CardHand pHand = players[i].getHand();
+            if(pHand.bustCheck()){
+                res.put(userName,"Lose");
+            }else if(dealer.getHand().bustCheck()){
+                res.put(userName,"Win");
+            }else if(dealerValue > pHand.getTotalValue()){
+                res.put(userName, "Lose");
+            }else if(dealerValue < pHand.getTotalValue()){
+                res.put(userName,"Win");
+            }else{
+                res.put(userName,"Push");
+            }
+        }
+        return res;
     }
 
     @Override

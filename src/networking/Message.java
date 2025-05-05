@@ -78,16 +78,17 @@ public class Message implements Serializable {
     /* Join Table Method */     // not properly UMLed yet; this is my attempt at implementation
     public static class JoinTable {
         public static class Request extends Message {
-            private int userId;
+            // changing this to a string userName since we are no longer using userID
+            private String userName;
             private int tableId;
 
-            public Request(int userId, int tableId) {
-                this.userId = userId;
+            public Request(String userId, int tableId) {
+                this.userName = userId;
                 this.tableId = tableId;
             }
 
-            public int getUserId() {
-                return userId;
+            public String getUserId() {
+                return userName;
             }
 
             public int getTableId() {

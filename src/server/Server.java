@@ -2,6 +2,7 @@ package server;
 
 import game.Dealer;
 import game.Player;
+import game.Table;
 import networking.AccountType;
 import networking.Message;
 
@@ -11,6 +12,9 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
 import dbHelper.CSVDatabaseHelper;
 
 public class Server {
@@ -30,6 +34,8 @@ public class Server {
     ServerSocket serverSocket;
     int port;
     boolean running;
+
+    private Map<Integer, TableThread> mapOfTables = new HashMap<>();
 
     /**
      * @apiNote For internal use only for the main connection thread
@@ -208,14 +214,31 @@ public class Server {
         tables[tableId].addClientToTable(clientThread);
         return true;
     }
-    public void spawnTable(Dealer dealer) {
+    // this should return a tableThread for dealerClient to handle
+    public TableThread spawnTable(Dealer dealer) {
         TableThread tableThread = new TableThread(dealer);
+        int tableID = tableThread.getTable().getTableId();
         tables[tablesSize++] = tableThread;
         new Thread(tableThread).start();
+        return tableThread;
     }
     public void broadcastNetworkMessageToTable(Message message) {
         for (ClientThreadWithHooks client : connectedClients) {
-            client.sendNetworkMessage(message);
+            if (client != null) {
+                client.sendNetworkMessage(message);
+            }
         }
+    }
+    public TableThread getTableById(int tableId) {
+        return mapOfTables.get(tableId);
+    }
+    public Message.LobbyData.Response handleLobbyDataRequest() {
+        Table[] activeTables = new Table[tablesSize];
+        for (int i = 0; i < tablesSize; i++) {
+            activeTables[i] = tables[i].getTable();
+        }
+        int playerCount = getPlayersInLobby().length;
+        int dealerCount = tablesSize; // since each table == one dealer
+        return new Message.LobbyData.Response(activeTables, playerCount, dealerCount);
     }
 }

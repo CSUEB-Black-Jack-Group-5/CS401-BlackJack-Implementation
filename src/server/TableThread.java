@@ -2,6 +2,7 @@ package server;
 
 import game.Dealer;
 import game.Table;
+import networking.Message;
 
 public class TableThread implements Runnable {
     private static final int MAX_JOINED_USERS = 6;
@@ -25,7 +26,14 @@ public class TableThread implements Runnable {
     }
 
     public void addClientToTable(ClientThreadWithHooks clientThreadWithHooks) {
-        this.joinedUsers[this.joinedUsersCount++] = clientThreadWithHooks;
-        clientThreadWithHooks.setActiveTable(this);
+        if (joinedUsersCount < MAX_JOINED_USERS) {
+            joinedUsers[joinedUsersCount++] = clientThreadWithHooks;
+            clientThreadWithHooks.setActiveTable(this);
+            // let client know they joined the table
+            clientThreadWithHooks.sendNetworkMessage(new Message.JoinTable.Response(true));
+        } else {
+            // let client know that the table is full
+            clientThreadWithHooks.sendNetworkMessage(new Message.JoinTable.Response(false));
+        }
     }
 }

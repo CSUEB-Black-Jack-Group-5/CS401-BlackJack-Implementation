@@ -1,19 +1,34 @@
 package game;
 
-public class CardHand {
+import java.io.Serializable;
+
+public class CardHand implements Serializable {
     private int numCards;
     private Card[] hand;
     private int valueLimit;
+    private boolean standing;
 
     public CardHand(int valueLimit){
         this.valueLimit = valueLimit;
         this.numCards = 0;
         this.hand = new Card[52];
+        this.standing = false;
+
     }
+
+    public void setStanding(boolean stand){
+        standing = stand;
+    }
+
+    public boolean isStanding(){
+        return standing;
+    }
+
     public boolean checkSplit() {
         if (this.numCards != 2) return false;
         return this.hand[0].getValue() == this.hand[1].getValue();
     }
+
     public Card getAndRemoveSplitCard() {
         Card splitCard = this.hand[1];
         numCards = 1;

@@ -21,9 +21,14 @@ public class PlayerClientThread extends ClientThreadWithHooks {
          * This is where the server game logic for the dealer happens
          */
         addMessageHook(Message.JoinTable.Request.class, (req) -> {
-            System.out.println("JoinTable Request");
-            // boolean status = server.movePlayerClientToTable(this, req.getTableId());
-            // sendNetworkMessage(new Message.JoinTable.Response(status));
+            int tableId = req.getTableId();
+            TableThread tableThread = server.getTableById(tableId);
+            if (tableThread != null) {
+                tableThread.addClientToTable(this);
+            } else {
+                // let user know table doesnt exist
+                sendNetworkMessage(new Message.JoinTable.Response(false));
+            }
         });
         addMessageHook(Message.Hit.Request.class, (req) -> {
             System.out.println("Hit Request");
