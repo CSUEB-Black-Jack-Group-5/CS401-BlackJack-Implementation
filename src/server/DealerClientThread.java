@@ -101,13 +101,15 @@ public class DealerClientThread extends ClientThreadWithHooks {
             System.out.println("Lobby data request");
 
             // Fetch all table threads from the server
-            TableThread[] tableThreads = serverRef.getTables();
-            Table[] tables = new Table[tableThreads.length];
+            // TableThread[] tableThreads = serverRef.getTables();
+            Table[] tables = serverRef.getTables();
+
+            // Table[] tables = new Table[tableThreads.length];
 
             // Convert each TableThread to it's underlying Table object
-            for (int i = 0; i < tableThreads.length; i++) {
-                tables[i] = tableThreads[i] != null ? tableThreads[i].getTable() : null;
-            }
+            // for (int i = 0; i < tableThreads.length; i++) {
+            //     tables[i] = tableThreads[i] != null ? tableThreads[i].getTable() : null;
+            // }
 
             // Count active players using a helper method; use dealer ID for tracking
             int activePlayers = serverRef.getPlayersInLobby().length;
