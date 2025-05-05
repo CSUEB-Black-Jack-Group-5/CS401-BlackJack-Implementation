@@ -1,12 +1,13 @@
 package game;
 
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Table {
+public class Table implements Serializable {
     protected static int idCount = 0;
     private int tableId;
     private Dealer dealer;

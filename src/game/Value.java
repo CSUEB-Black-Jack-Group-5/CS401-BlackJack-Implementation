@@ -1,6 +1,8 @@
 package game;
 
-public enum Value {
+import java.io.Serializable;
+
+public enum Value implements Serializable {
     TWO(2, false, 0),
     THREE(3, false, 0),
     FOUR(4, false, 0),
