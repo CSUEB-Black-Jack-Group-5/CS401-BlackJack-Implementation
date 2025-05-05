@@ -22,8 +22,8 @@ public class PlayerClientThread extends ClientThreadWithHooks {
          */
         addMessageHook(Message.JoinTable.Request.class, (req) -> {
             System.out.println("JoinTable Request");
-            // boolean status = server.movePlayerClientToTable(this, req.getTableId());
-            // sendNetworkMessage(new Message.JoinTable.Response(status));
+            boolean status = server.movePlayerClientToTable(this, req.getTableId());
+            sendNetworkMessage(new Message.JoinTable.Response(status));
         });
         addMessageHook(Message.Hit.Request.class, (req) -> {
             System.out.println("Hit Request");
@@ -74,6 +74,24 @@ public class PlayerClientThread extends ClientThreadWithHooks {
         });
         addMessageHook(Message.LobbyData.Request.class, (req) -> {
             System.out.println("Lobby data request");
+
+            // Fetch all table threads from the server
+            // TableThread[] tableThreads = serverRef.getTables();
+            Table[] tables = server.getTables();
+
+            // Table[] tables = new Table[tableThreads.length];
+
+            // Convert each TableThread to it's underlying Table object
+            // for (int i = 0; i < tableThreads.length; i++) {
+            //     tables[i] = tableThreads[i] != null ? tableThreads[i].getTable() : null;
+            // }
+
+            // Count active players using a helper method; use dealer ID for tracking
+            int activePlayers = server.getPlayersInLobby().length;
+
+            // Send lobby data response including table list and player/dealer count
+            sendNetworkMessage(new Message.LobbyData.Response(tables, activePlayers, 0));
+            System.out.println("Lobby data request");
             // final Table[] tables = Arrays.stream(server.getTables()).map(tableThread -> tableThread.table).toArray();
             // final ClientThreadWithHooks[] dealers = server.getDealersInLobby();
             // final ClientThreadWithHooks[] players = server.getPlayersInLobby();
@@ -82,10 +100,10 @@ public class PlayerClientThread extends ClientThreadWithHooks {
 
             //-------------NOTE------------------
             // dummy vals to compile
-            Table[] tables = new Table[1];
-            int dummyPlayerCount = 6;
-            int dummyDealerCount = 1;
-            sendNetworkMessage(new Message.LobbyData.Response(tables,dummyPlayerCount,dummyDealerCount));
+            // Table[] tables = new Table[1];
+            // int dummyPlayerCount = 6;
+            // int dummyDealerCount = 1;
+            // sendNetworkMessage(new Message.LobbyData.Response(tables,dummyPlayerCount,dummyDealerCount));
         });
         addMessageHook(Message.GameData.Request.class, (req) -> {
             System.out.println("GameData request");
