@@ -1,6 +1,10 @@
 package client.DealerTable;
 
 
+import client.BlackjackGame;
+import networking.AccountType;
+import networking.Message;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -90,7 +94,7 @@ public class DealerTableBlackJack extends JFrame {
         // Set up the frame with improved dimensions for widescreen displays
 
         // table Id will getting response from server
-        // setTitle("Group5 Blackjack - Table #" + tableId);
+        setTitle("Group5 Blackjack - Table #" + tableId);
         setSize(1100, 800);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -362,7 +366,7 @@ public class DealerTableBlackJack extends JFrame {
 
     private void positionPlayersInSemicircle(JPanel panel) {
         int playerCount = playerPositions.size();
-        int centerX = 450; // Center X coordinate
+        int centerX = 500; // Center X coordinate
         int centerY = 300; // Center Y coordinate
         int radius = 250;  // Radius of the semi-circle
 
@@ -407,6 +411,7 @@ public class DealerTableBlackJack extends JFrame {
         // Shuffle button action
         shuffleButton.addActionListener(e -> {
             animateShuffleDeck();
+
         });
     }
 
@@ -651,5 +656,10 @@ public class DealerTableBlackJack extends JFrame {
         });
 
         return button;
+    }
+
+    private void requestShuffle() {
+        //Message.Shuffle.Request request = new Message.Shuffle.Request();
+        //BlackjackGame.client.sendNetworkMessage(request);
     }
 }

@@ -59,12 +59,16 @@ public class PlayerLobbyBlackJack extends JFrame {
         // Hook for join table response
         BlackjackGame.client.addMessageHook(Message.JoinTable.Response.class, response -> {
             Message.JoinTable.Response joinTableResponse = (Message.JoinTable.Response) response;
-            playerLobbyBlackJackPanel.handleJoinTableResponse(joinTableResponse,1);
+            playerLobbyBlackJackPanel.handleJoinTableResponse(joinTableResponse);
         });
     }
 
     private void requestLobbyData() {
         Message.LobbyData.Request request = new Message.LobbyData.Request(0, AccountType.PLAYER);
         BlackjackGame.client.sendNetworkMessage(request);
+    }
+
+    public PlayerLobbyBlackJackPanel getPlayerLobbyBlackJackPanel() {
+        return playerLobbyBlackJackPanel;
     }
 }

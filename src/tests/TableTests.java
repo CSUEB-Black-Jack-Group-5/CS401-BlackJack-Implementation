@@ -13,7 +13,7 @@ public class TableTests {
     static String username = "fwaffycafecat";
     static String password = "garbage_value";
     static Table table;
-    static int limit;
+    static int limit = 17;
     static Dealer dealer = new Dealer(username, password, limit);
     Dealer dealer1 = new Dealer("murderless_Crow", "testing5", limit);
     Dealer dealer2 = new Dealer("City_Escape", "supersonicspeed", limit);

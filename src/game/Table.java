@@ -1,12 +1,13 @@
 package game;
 
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Table {
+public class Table implements Serializable {
     protected static int idCount = 0;
     private int tableId;
     private Dealer dealer;
@@ -228,8 +229,13 @@ public class Table {
     // returns the current state of the table
     // INSERT FORMAT HERE
     public String toString() {
-        String data = "Table Id: " + this.tableId + "\nDealer: " +
-                this.dealer.getUsername() + "\nPlayers:\n";
+        String data = "Table Id: " + this.tableId + "\nDealer: ";
+        if (dealer != null) {
+            data += this.dealer.getUsername();
+        } else {
+            data += "NONE";
+        }
+        data += "\nPlayers:\n";
         if (playerCount == 0) {
             data += "NONE\n";
         } else {

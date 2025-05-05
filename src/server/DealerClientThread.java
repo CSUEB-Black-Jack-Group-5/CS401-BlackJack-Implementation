@@ -56,11 +56,12 @@ public class DealerClientThread extends ClientThreadWithHooks {
             System.out.println("CreateTable Request");
 
             // Create a new table on the server
-            serverRef.spawnTable();
+            TableThread table = serverRef.spawnTable();
+            table.getTable().setDealer(dealer);
 
             // Send back a dummy tableId for now (e.g., always 1)
             // Replace with actual table ID logic if needed later
-            sendNetworkMessage(new Message.CreateTable.Response(true, 1));
+            sendNetworkMessage(new Message.CreateTable.Response(true, table.getTable()));
         });
 
 
@@ -102,16 +103,30 @@ public class DealerClientThread extends ClientThreadWithHooks {
 
             // Fetch all table threads from the server
             TableThread[] tableThreads = serverRef.getTables();
-            Table[] tables = new Table[tableThreads.length];
+            Table[] tables;
 
-            // Convert each TableThread to it's underlying Table object
-            for (int i = 0; i < tableThreads.length; i++) {
-                tables[i] = tableThreads[i] != null ? tableThreads[i].getTable() : null;
+            if (tableThreads != null || tableThreads.length != 0) {
+                tables = new Table[tableThreads.length];
+
+                // Convert each TableThread to it's underlying Table object
+                for (int i = 0; i < tableThreads.length; i++) {
+                    tables[i] = tableThreads[i].getTable();
+                }
+            } else {
+                tables = new Table[0];
             }
-
             // Count active players using a helper method; use dealer ID for tracking
-            int activePlayers = serverRef.getPlayersInLobby().length;
-            int dealerId = dealer.getDealerId();
+            int activePlayers = serverRef.getClientsInLobbySize();
+            // made a getter for lobby size to compile since .getPlayersInLobby() doesn't work
+            int dealerId = req.getDealerId();
+
+//            //-------------NOTE------------------
+//            // dummy vals to compile
+//            Table[] tables = new Table[1];
+//            tables[0] = new Table();
+//            tables[0].setDealer(dealer);
+//            int dummyPlayerCount = 6;
+//            int dummyDealerCount = 1;
 
             // Send lobby data response including table list and player/dealer count
             sendNetworkMessage(new Message.LobbyData.Response(tables, activePlayers, dealerId));

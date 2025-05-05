@@ -54,6 +54,7 @@ public class DealerLobbyBlackJack extends JFrame {
 
     }
 
+    // i think you can remove these two message hooks since i hooked them up in BlackjackGame.java
     private void setupMessageHooks() {
         /// Hook for lobby data response
         BlackjackGame.client.addMessageHook(Message.LobbyData.Response.class, response -> {
@@ -71,5 +72,9 @@ public class DealerLobbyBlackJack extends JFrame {
     private void requestLobbyData() {
         Message.LobbyData.Request request = new Message.LobbyData.Request(0, AccountType.DEALER);
         BlackjackGame.client.sendNetworkMessage(request);
+    }
+
+    public DealerLobbyBlackJackPanel getDealerLobbyBlackJackPanel() {
+        return dealerLobbyBlackJackPanel;
     }
 }
