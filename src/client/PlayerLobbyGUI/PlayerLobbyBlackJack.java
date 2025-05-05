@@ -44,23 +44,31 @@ public class PlayerLobbyBlackJack extends JFrame {
         setContentPane(playerLobbyBlackJackPanel);
 
         /// Set up message hooks to handle server responses
-        setupMessageHooks();
+        // setupMessageHooks();
 
         /// Request initial lobby data
         requestLobbyData();
     }
+    public void handleLobbyDataResponse(Message.LobbyData.Response response) {
+        playerLobbyBlackJackPanel.updateLobbyData(response);
+    }
+
+    public void handleJoinTableResponse(Message.JoinTable.Response response) {
+        playerLobbyBlackJackPanel.handleJoinTableResponse(response, 1);
+    }
+
     private void setupMessageHooks() {
         // Hook for lobby data response
-        BlackjackGame.client.addMessageHook(Message.LobbyData.Response.class, response -> {
-            Message.LobbyData.Response lobbyDataResponse = (Message.LobbyData.Response) response;
-            playerLobbyBlackJackPanel.updateLobbyData(lobbyDataResponse);
-        });
+        // BlackjackGame.client.addMessageHook(Message.LobbyData.Response.class, response -> {
+        //     Message.LobbyData.Response lobbyDataResponse = (Message.LobbyData.Response) response;
+        //     playerLobbyBlackJackPanel.updateLobbyData(lobbyDataResponse);
+        // });
 
-        // Hook for join table response
-        BlackjackGame.client.addMessageHook(Message.JoinTable.Response.class, response -> {
-            Message.JoinTable.Response joinTableResponse = (Message.JoinTable.Response) response;
-            playerLobbyBlackJackPanel.handleJoinTableResponse(joinTableResponse,1);
-        });
+        // // Hook for join table response
+        // BlackjackGame.client.addMessageHook(Message.JoinTable.Response.class, response -> {
+        //     Message.JoinTable.Response joinTableResponse = (Message.JoinTable.Response) response;
+        //     playerLobbyBlackJackPanel.handleJoinTableResponse(joinTableResponse,1);
+        // });
     }
 
     private void requestLobbyData() {

@@ -40,16 +40,16 @@ public class BlackjackGame {
                 // Based on account type, set up appropriate hooks and GUI
                 switch (loginResponse.getType()) {
                     case DEALER: {
-                        setupDealerHooks();
                         showDealerGUI();
+                        setupDealerHooks();
 
                         // After showing dealer lobby, request lobby data from server
                         client.sendNetworkMessage(new Message.LobbyData.Request(0, AccountType.DEALER));
                         break;
                     }
                     case PLAYER: {
-                        setupPlayerHooks();
                         showPlayerGUI();
+                        setupPlayerHooks();
 
                         // After showing player lobby, request lobby data from server
                         client.sendNetworkMessage(new Message.LobbyData.Request(0, AccountType.PLAYER));
@@ -97,15 +97,19 @@ public class BlackjackGame {
     private static void setupDealerHooks() {
         client.addMessageHook(Message.CreateTable.Response.class, (res) -> {
             System.out.println("CreateTable Response");
+            dealerLobby.handleCreateTableResponse(res);
         });
 
         client.addMessageHook(Message.Stand.Response.class, (res) -> {
             System.out.println("Stand Response");
         });
 
+        // NOTE: This is setup in DealerLobbyBlackJackPanel
         client.addMessageHook(Message.LobbyData.Response.class, (res) -> {
-            System.out.println("Lobby data Response");
-            // Handle lobby data response - update lobby UI
+             System.out.println("Lobby data Response");
+             System.out.println("   Tables: " + res.getTables().length);
+             dealerLobby.handleLobbyDataResponse(res);
+             // Handle lobby data response - update lobby UI
         });
 
         client.addMessageHook(Message.GameData.Response.class, (res) -> {
@@ -127,6 +131,7 @@ public class BlackjackGame {
     private static void setupPlayerHooks() {
         client.addMessageHook(Message.JoinTable.Response.class, (res) -> {
             System.out.println("JoinTable Response");
+            System.out.println(res.getStatus());
             // Handle join table response
         });
 
@@ -141,9 +146,14 @@ public class BlackjackGame {
         });
 
         client.addMessageHook(Message.LobbyData.Response.class, (res) -> {
-            System.out.println("Lobby data Response");
-            // Handle lobby data response - update lobby UI
+            playerLobby.handleLobbyDataResponse(res);
         });
+
+        // Handled by DealerLobbyBlackJackPanel
+        // client.addMessageHook(Message.LobbyData.Response.class, (res) -> {
+        //     System.out.println("Lobby data Response");
+        //     // Handle lobby data response - update lobby UI
+        // });
 
         client.addMessageHook(Message.GameData.Response.class, (res) -> {
             System.out.println("GameData Response");
@@ -172,7 +182,7 @@ public class BlackjackGame {
     }
 
     private static void showDealerGUI() {
-        javax.swing.SwingUtilities.invokeLater(() -> {
+        //javax.swing.SwingUtilities.invokeLater(() -> {
             // Hide intro GUI if it's still visible
             if (introGUI != null && introGUI.isVisible()) {
                 introGUI.setVisible(false);
@@ -181,11 +191,11 @@ public class BlackjackGame {
             // Show dealer lobby
             dealerLobby = new DealerLobbyBlackJack();
             dealerLobby.setVisible(true);
-        });
+        // });
     }
 
     private static void showPlayerGUI() {
-        javax.swing.SwingUtilities.invokeLater(() -> {
+        // javax.swing.SwingUtilities.invokeLater(() -> {
             // Hide intro GUI if it's still visible
             if (introGUI != null && introGUI.isVisible()) {
                 introGUI.setVisible(false);
@@ -194,7 +204,7 @@ public class BlackjackGame {
             // Show player lobby
             playerLobby = new PlayerLobbyBlackJack();
             playerLobby.setVisible(true);
-        });
+        // });
       
 //        javax.swing.SwingUtilities.invokeLater(() -> {
 //            BlackjackIntroGUI game = new BlackjackIntroGUI();

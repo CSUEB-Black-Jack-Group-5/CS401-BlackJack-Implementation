@@ -48,25 +48,33 @@ public class DealerLobbyBlackJack extends JFrame {
         setContentPane(dealerLobbyBlackJackPanel);
 
         /// Set up message hooks to handle server responses
-        setupMessageHooks();
+        // setupMessageHooks();
 
         /// Request initial lobby data
         requestLobbyData();
 
     }
 
+    public void handleLobbyDataResponse(Message.LobbyData.Response response) {
+        dealerLobbyBlackJackPanel.updateLobbyData(response);
+    }
+
+    public void handleCreateTableResponse(Message.CreateTable.Response response) {
+        dealerLobbyBlackJackPanel.handleCreateTableResponse(response);
+    }
+
     private void setupMessageHooks() {
         /// Hook for lobby data response
-        BlackjackGame.client.addMessageHook(Message.LobbyData.Response.class, response -> {
-            Message.LobbyData.Response lobbyDataResponse = (Message.LobbyData.Response) response;
-            dealerLobbyBlackJackPanel.updateLobbyData(lobbyDataResponse);
-        });
+        // BlackjackGame.client.addMessageHook(Message.LobbyData.Response.class, response -> {
+        //     Message.LobbyData.Response lobbyDataResponse = (Message.LobbyData.Response) response;
+        //     dealerLobbyBlackJackPanel.updateLobbyData(lobbyDataResponse);
+        // });
 
         /// Hook for create table response
-        BlackjackGame.client.addMessageHook(Message.CreateTable.Response.class, response -> {
-            Message.CreateTable.Response createTableResponse = (Message.CreateTable.Response) response;
-            dealerLobbyBlackJackPanel.handleCreateTableResponse(createTableResponse);
-        });
+        // BlackjackGame.client.addMessageHook(Message.CreateTable.Response.class, response -> {
+        //     Message.CreateTable.Response createTableResponse = (Message.CreateTable.Response) response;
+        //     dealerLobbyBlackJackPanel.handleCreateTableResponse(createTableResponse);
+        // });
     }
 
     private void requestLobbyData() {
