@@ -7,12 +7,12 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 import client.BlackjackGame;
-import client.ClientMain;
+import game.Table;
 import networking.Message;
 import networking.AccountType;
 
 public class PlayerLobbyBlackJackPanel extends JPanel {
-    private ArrayList<PlayerLobbyBlackJack.GuiTable> tables;
+    private ArrayList<PlayerLobbyBlackJack.GuiTable> GUItables;
     private JPanel tablesPanel;
     private int playerId;
     private String playerName;
@@ -23,7 +23,7 @@ public class PlayerLobbyBlackJackPanel extends JPanel {
     private Color feltPatternColor = new Color(0, 85, 0); // Slightly darker green for pattern
 
     public PlayerLobbyBlackJackPanel(ArrayList<PlayerLobbyBlackJack.GuiTable> tables) {
-        this.tables = tables;
+        this.GUItables = tables;
         this.playerId = playerId;
         this.playerName = playerName;
         setLayout(new BorderLayout());
@@ -44,6 +44,24 @@ public class PlayerLobbyBlackJackPanel extends JPanel {
     ///  Method to update UI with lobby data received from server
     public void updateLobbyData(Message.LobbyData.Response response) {
         /// Update tables
+        Table[] responseTables = response.getTables();
+        tablesPanel.removeAll();
+        System.out.println(responseTables.length);
+        GUItables.clear();
+
+        for (int i = 0; i < responseTables.length; i++) {
+            Table table = responseTables[i];
+            if (table == null) {
+                System.err.println("Table in LobbyData response is null");
+                continue;
+            }
+            PlayerLobbyBlackJack.GuiTable guiTable = new PlayerLobbyBlackJack.GuiTable(
+                    table.getTableId(),
+                    table.getPlayerCount(),
+                    table.getPlayerLimit()
+            );
+            GUItables.add(guiTable);
+        }
 //       SwingUtilities.invokeLater(() -> {
 //            /// Update tables if necessary
 //            if (response.getTables() != null) {
@@ -140,8 +158,8 @@ public class PlayerLobbyBlackJackPanel extends JPanel {
     private void refreshTablesList() {
         tablesPanel.removeAll();
 
-        for (int i = 0; i < tables.size(); i++) {
-            PlayerLobbyBlackJack.GuiTable table = tables.get(i);
+        for (int i = 0; i < GUItables.size(); i++) {
+            PlayerLobbyBlackJack.GuiTable table = GUItables.get(i);
             JPanel tablePanel = createTablePanel(table, i);
             tablesPanel.add(tablePanel);
         }
@@ -192,19 +210,19 @@ public class PlayerLobbyBlackJackPanel extends JPanel {
         /// Create join button for each table
         RoundedButtonPlayerLobby joinButton = new RoundedButtonPlayerLobby("Join Table", 10);
         joinButton.setFont(new Font("Arial", Font.BOLD, 12));
-//        int buttonWidth = 50;
-//        int buttonHeight = 26;
-//        int buttonX = (panelWidth - buttonWidth) / 2;
-//        int buttonY = panelHeight / 2 + 10;
-//        ///  Set position of button
-//        joinButton.setBounds(buttonX, buttonY, buttonWidth, buttonHeight);
+        int buttonWidth = 50;
+        int buttonHeight = 26;
+        int buttonX = (panelWidth - buttonWidth) / 2;
+        int buttonY = panelHeight / 2 + 10;
+        ///  Set position of button
+        joinButton.setBounds(buttonX, buttonY, buttonWidth, buttonHeight);
         joinButton.setForeground(new Color(236, 236, 236));
         joinButton.setFocusPainted(false);
         joinButton.setPreferredSize(new Dimension(120, 45));
 
         /// Disable button if table is full
         if (table.occupancy >= table.maxPlayers) {
-            joinButton.setEnabled(false);
+            // joinButton.setEnabled(false);
             joinButton.setBackground(new Color(178, 190, 195));
         }
         else {
@@ -227,7 +245,7 @@ public class PlayerLobbyBlackJackPanel extends JPanel {
 
         /// Create button panel for join button
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        buttonPanel.setOpaque(false);
+        buttonPanel.setOpaque(true);
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(90, 0, 0, 0));
         buttonPanel.add(joinButton);
 
@@ -259,7 +277,7 @@ public class PlayerLobbyBlackJackPanel extends JPanel {
     public void handleJoinTableResponse(Message.JoinTable.Response response, int tableId) {
         if (response.getStatus()) {
             /// Find the table and update its occupancy
-            for (PlayerLobbyBlackJack.GuiTable table : tables) {
+            for (PlayerLobbyBlackJack.GuiTable table : GUItables) {
                 if (table.id == tableId) {
                     table.occupancy++;
                     break;
