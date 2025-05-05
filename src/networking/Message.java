@@ -78,17 +78,16 @@ public class Message implements Serializable {
     /* Join Table Method */     // not properly UMLed yet; this is my attempt at implementation
     public static class JoinTable {
         public static class Request extends Message {
-            // changing this to a string userName since we are no longer using userID
-            private String userName;
+            private int userId;
             private int tableId;
 
-            public Request(String userId, int tableId) {
-                this.userName = userId;
+            public Request(Integer userId, int tableId) {
+                this.userId = userId;
                 this.tableId = tableId;
             }
 
-            public String getUserId() {
-                return userName;
+            public Integer getUserId() {
+                return userId;
             }
 
             public int getTableId() {
@@ -531,6 +530,23 @@ public class Message implements Serializable {
 
             public boolean getStatus() {    // added getStatus method
                 return status;
+            }
+        }
+    }
+    /* Player Bet Method */
+    public static class Bet {
+        public static class Request extends Message {
+            public Request() {}
+        }
+
+        public static class Response extends Message {
+            public final int amount;
+
+            public Response(int amount) {
+                this.amount = amount;
+            }
+            public int getAmount(){
+                return this.amount;
             }
         }
     }
