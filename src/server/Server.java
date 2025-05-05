@@ -35,7 +35,7 @@ public class Server {
     int port;
     boolean running;
 
-    private Map<Integer, TableThread> mapOfTables = new HashMap<>();
+    private Map<String, Integer> mapOfTables = new HashMap<>();
 
     /**
      * @apiNote For internal use only for the main connection thread
@@ -110,7 +110,7 @@ public class Server {
                         // TODO: AccountType accountType = serverRef.db.getUserTypeFor(username);
 //                        AccountType accountType = AccountType.PLAYER;
                         ClientThreadWithHooks clientThread = switch (accountType) {
-                            case AccountType.PLAYER -> new PlayerClientThread(socket, serverRef, writer, reader);
+                            case AccountType.PLAYER -> new PlayerClientThread(new Player(username,"0"),socket, serverRef, writer, reader);
                             case AccountType.DEALER -> new DealerClientThread(new Dealer(username, password, 17), socket, serverRef, writer, reader);
                         };
                         writer.writeObject(new Message.Login.Response(true, accountType));
@@ -211,13 +211,16 @@ public class Server {
             System.err.println("tableId = " + tableId + " doesn't exist");
             return false;
         }
+        mapOfTables.put(clientThread.getPlayerUserName(),tableId);
         tables[tableId].addClientToTable(clientThread);
+        Player player = clientThread.getPlayer();
+        // assigning Player to table class
+        tables[tableId].getTable().addPlayer(player);
         return true;
     }
     // this should return a tableThread for dealerClient to handle
     public TableThread spawnTable(Dealer dealer) {
         TableThread tableThread = new TableThread(dealer);
-        int tableID = tableThread.getTable().getTableId();
         tables[tablesSize++] = tableThread;
         new Thread(tableThread).start();
         return tableThread;
@@ -229,8 +232,10 @@ public class Server {
             }
         }
     }
-    public TableThread getTableById(int tableId) {
-        return mapOfTables.get(tableId);
+    public TableThread getTableByUsername(String username) {
+        Integer tableId = mapOfTables.get(username);
+        if (tableId == null) return null;
+        return tables[tableId];
     }
     public Message.LobbyData.Response handleLobbyDataRequest() {
         Table[] activeTables = new Table[tablesSize];
