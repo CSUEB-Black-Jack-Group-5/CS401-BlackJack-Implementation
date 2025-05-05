@@ -1,5 +1,6 @@
 package server;
 
+import game.Dealer;
 import game.Table;
 
 public class TableThread implements Runnable {
@@ -10,10 +11,10 @@ public class TableThread implements Runnable {
     int joinedUsersCount;
     Table table;
 
-    public TableThread() {
+    public TableThread(Dealer dealer) {
         this.joinedUsers = new ClientThreadWithHooks[MAX_JOINED_USERS];
         this.joinedUsersCount = 0;
-        this.table = new Table();
+        this.table = new Table(dealer);
     }
 
     @Override

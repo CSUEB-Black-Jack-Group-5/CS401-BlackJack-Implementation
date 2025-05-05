@@ -22,10 +22,10 @@ public class DealerClientThread extends ClientThreadWithHooks {
      * Constructor initializes the thread, registers message hooks, and prepares the dealer object.
      */
 
-    public DealerClientThread(Socket socket, Server serverRef, ObjectOutputStream writer, ObjectInputStream reader) {
+    public DealerClientThread(Dealer dealer, Socket socket, Server serverRef, ObjectOutputStream writer, ObjectInputStream reader) {
         super(socket, writer, reader);
         this.serverRef = serverRef;
-        this.dealer = new Dealer("dealer1", "letmein", 17);  // Temporary dealer login
+        this.dealer = dealer;  // Temporary dealer login
 
         System.out.println("Spawned dealer thread");
 
@@ -56,7 +56,7 @@ public class DealerClientThread extends ClientThreadWithHooks {
             System.out.println("CreateTable Request");
 
             // Create a new table on the server
-            serverRef.spawnTable();
+            serverRef.spawnTable(dealer);
 
             // Send back a dummy tableId for now (e.g., always 1)
             // Replace with actual table ID logic if needed later
