@@ -146,6 +146,9 @@ public class Player {
         return hand;
     }
 
+    // Allows external access to the second hand created after a split (used in Split.Response)
+    public CardHand getSplitHand() { return splitHand; }
+
     public Wallet getWallet() {
         return wallet;
     }

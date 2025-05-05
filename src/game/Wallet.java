@@ -28,7 +28,7 @@ public class Wallet {
     /**
      * @return The total funds amount of this wallet
      */
-    float getFunds() {
+    public float getFunds() {
         return funds;
-    }
+    } // added public specifier for PlayerClientThread
 }

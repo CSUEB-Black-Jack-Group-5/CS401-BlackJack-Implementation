@@ -1,5 +1,7 @@
 package server;
 
+import game.Dealer;
+import game.Player;
 import networking.AccountType;
 import networking.Message;
 
@@ -103,7 +105,7 @@ public class Server {
 //                        AccountType accountType = AccountType.PLAYER;
                         ClientThreadWithHooks clientThread = switch (accountType) {
                             case AccountType.PLAYER -> new PlayerClientThread(socket, serverRef, writer, reader);
-                            case AccountType.DEALER -> new DealerClientThread(socket, serverRef, writer, reader);
+                            case AccountType.DEALER -> new DealerClientThread(new Dealer(username, password, 17), socket, serverRef, writer, reader);
                         };
                         writer.writeObject(new Message.Login.Response(true, accountType));
 
@@ -179,10 +181,10 @@ public class Server {
                 .filter(clientThreadWithHooks -> clientThreadWithHooks instanceof DealerClientThread)
                 .toArray();
     }
-    public ClientThreadWithHooks[] getPlayersInLobby() {
-        return (ClientThreadWithHooks[]) Arrays.stream(clientsInLobby)
+    public PlayerClientThread[] getPlayersInLobby() {
+        return (PlayerClientThread[]) Arrays.stream(clientsInLobby)
                 .filter(clientThreadWithHooks -> clientThreadWithHooks instanceof PlayerClientThread)
-                .toArray();
+                .toArray(PlayerClientThread[]::new);
     }
     // public Table getTableById(int tableId) {
     //     List<Table> filteredTables = Arrays.stream(tables).filter(tableThread -> tableThread.table.getTableId() == tableId).toList();
@@ -206,8 +208,8 @@ public class Server {
         tables[tableId].addClientToTable(clientThread);
         return true;
     }
-    public void spawnTable() {
-        TableThread tableThread = new TableThread();
+    public void spawnTable(Dealer dealer) {
+        TableThread tableThread = new TableThread(dealer);
         tables[tablesSize++] = tableThread;
         new Thread(tableThread).start();
     }

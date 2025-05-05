@@ -27,6 +27,8 @@ public class DealerLobbyBlackJackPanel extends JPanel {
         this.GUItables = tables;
         setLayout(new BorderLayout());
         setBackground(feltGreen);
+        dealerCountLabel = new JLabel("Something");
+        playerCountLabel = new JLabel("Something");
 
         ///  Setup UI
         dealerSetupUI();
