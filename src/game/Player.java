@@ -1,6 +1,8 @@
 package game;
 
-public class Player {
+import java.io.Serializable;
+
+public class Player implements Serializable {
     private static int idCount = 0;
     private int playerId;
     private boolean isReady;
