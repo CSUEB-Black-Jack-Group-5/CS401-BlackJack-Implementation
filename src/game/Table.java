@@ -25,9 +25,8 @@ public class Table {
     // maybe flag in the dealer class that triggers if they have a table open already?
     // actually i don't even know if we want this feature ^^ we'll deal with it later if we do want this
     /* CONSTRUCTOR */
-    public Table(Dealer dealer){
+    public Table(){
         this.tableId = idCount++;
-        this.dealer = dealer;
         this.players = new Player[PLAYER_LIMIT];
         this.playerCount = 0;
         this.turnTimer = new Timer(60);
@@ -63,6 +62,10 @@ public class Table {
     // checks if the table is in a game
     public boolean isActive() {
         return this.isActive;
+    }
+
+    public void setDealer(Dealer dealer) {
+        this.dealer = dealer;
     }
 
     /* CHECKS IF THE TABLE IS FULL */

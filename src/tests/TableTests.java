@@ -13,9 +13,10 @@ public class TableTests {
     static String username = "fwaffycafecat";
     static String password = "garbage_value";
     static Table table;
-    static Dealer dealer = new Dealer(username, password);
-    Dealer dealer1 = new Dealer("murderless_Crow", "testing5");
-    Dealer dealer2 = new Dealer("City_Escape", "supersonicspeed");
+    static int limit;
+    static Dealer dealer = new Dealer(username, password, limit);
+    Dealer dealer1 = new Dealer("murderless_Crow", "testing5", limit);
+    Dealer dealer2 = new Dealer("City_Escape", "supersonicspeed", limit);
     Player user1 = new Player("void_stranger", "0");
     Player user2 = new Player("layer_cake", "1");
     Player user3 = new Player("gloam_valley", "2");
@@ -26,7 +27,8 @@ public class TableTests {
     @BeforeClass
     public static void setUp() {
         // Initialize a Table object before each test
-        table = new Table(dealer);
+        table = new Table();
+        table.setDealer(dealer);
     }
 
     /* CHECKS ALL PROPERTIES OF THE TABLE ADDED */

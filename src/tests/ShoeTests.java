@@ -1,7 +1,7 @@
 package tests;
 
 import game.Shoe;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 public class ShoeTests {
     @Test
