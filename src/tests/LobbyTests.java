@@ -13,9 +13,9 @@ public class LobbyTests {
     static String username = "fwaffycafecat";
     static String password = "garbage_value";
     static Lobby lobby = new Lobby();
-    static Dealer dealer = new Dealer(username, password);
-    Dealer dealer1 = new Dealer("murderless_Crow", "testing5");
-    Dealer dealer2 = new Dealer("City_Escape", "supersonicspeed");
+    static Dealer dealer = new Dealer(username, password,17);
+    Dealer dealer1 = new Dealer("murderless_Crow", "testing5",17);
+    Dealer dealer2 = new Dealer("City_Escape", "supersonicspeed",17);
     Player user1 = new Player("void_stranger", "0");
     Player user2 = new Player("layer_cake", "1");
 

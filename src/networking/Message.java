@@ -81,12 +81,12 @@ public class Message implements Serializable {
             private int userId;
             private int tableId;
 
-            public Request(int userId, int tableId) {
+            public Request(Integer userId, int tableId) {
                 this.userId = userId;
                 this.tableId = tableId;
             }
 
-            public int getUserId() {
+            public Integer getUserId() {
                 return userId;
             }
 
@@ -530,6 +530,23 @@ public class Message implements Serializable {
 
             public boolean getStatus() {    // added getStatus method
                 return status;
+            }
+        }
+    }
+    /* Player Bet Method */
+    public static class Bet {
+        public static class Request extends Message {
+            public Request() {}
+        }
+
+        public static class Response extends Message {
+            public final int amount;
+
+            public Response(int amount) {
+                this.amount = amount;
+            }
+            public int getAmount(){
+                return this.amount;
             }
         }
     }

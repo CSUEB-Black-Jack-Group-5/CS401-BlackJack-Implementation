@@ -78,6 +78,7 @@ public class ClientThreadWithHooks implements Runnable {
             this.writer.writeObject(message);
         } catch (IOException e) {
             System.err.println("Failed to write message");
+            e.printStackTrace();
         }
     }
 

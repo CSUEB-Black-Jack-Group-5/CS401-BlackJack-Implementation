@@ -1,8 +1,9 @@
 package game;
 
+import java.io.Serializable;
 import java.util.Random;
 
-public class Shoe {
+public class Shoe implements Serializable {
     private Card[] extendedDeck;
     private int numCards;
     private int numDecks;

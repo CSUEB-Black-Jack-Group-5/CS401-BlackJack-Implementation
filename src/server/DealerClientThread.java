@@ -22,10 +22,10 @@ public class DealerClientThread extends ClientThreadWithHooks {
      * Constructor initializes the thread, registers message hooks, and prepares the dealer object.
      */
 
-    public DealerClientThread(Socket socket, Server serverRef, ObjectOutputStream writer, ObjectInputStream reader) {
+    public DealerClientThread(Dealer dealer, Socket socket, Server serverRef, ObjectOutputStream writer, ObjectInputStream reader) {
         super(socket, writer, reader);
         this.serverRef = serverRef;
-        this.dealer = new Dealer("dealer1", "letmein", 17);  // Temporary dealer login
+        this.dealer = dealer;  // Temporary dealer login
 
         System.out.println("Spawned dealer thread");
 
@@ -36,12 +36,20 @@ public class DealerClientThread extends ClientThreadWithHooks {
          * I also tried implementing both hooks below these comments.
          */
 
-        // addMessageHook(Message.CreateTable.Request.class, (req) -> {
-        //     System.out.println("CreateTable Request");
-        //     serverRef.spawnTable();
-        //     sendNetworkMessage(new Message.CreateTable.Response()); //TODO: Be more thoughtful about errors
-        //     serverRef.broadcastNetworkMessage(new Message.LobbyData.Response());
-        // });
+        addMessageHook(Message.CreateTable.Request.class, (req) -> {
+            TableThread tableThread = serverRef.spawnTable(dealer);
+            if (tableThread != null) {
+                int tableId = tableThread.getTable().getTableId();
+                System.out.println("Sending success response with table ID: " + tableId);
+                sendNetworkMessage(new Message.CreateTable.Response(true, tableId));
+
+                // now we broadcast updated lobby info
+                Message.LobbyData.Response lobbyData = serverRef.handleLobbyDataRequest();
+                serverRef.broadcastNetworkMessageToTable(lobbyData);
+            } else {
+                sendNetworkMessage(new Message.CreateTable.Response(false, -1));
+            }
+        });
 
         // addMessageHook(Message.Deal.Request.class, (req) -> {
         //     System.out.println("Deal Request");
@@ -52,16 +60,16 @@ public class DealerClientThread extends ClientThreadWithHooks {
          * Handles CreateTable Request — spawns a new table and sends a basic response.
          * Right now, this just assumes the table is always created successfully.
          */
-        addMessageHook(Message.CreateTable.Request.class, (req) -> {
-            System.out.println("CreateTable Request");
-
-            // Create a new table on the server
-            serverRef.spawnTable();
-
-            // Send back a dummy tableId for now (e.g., always 1)
-            // Replace with actual table ID logic if needed later
-            sendNetworkMessage(new Message.CreateTable.Response(true, 1));
-        });
+//        addMessageHook(Message.CreateTable.Request.class, (req) -> {
+//            System.out.println("CreateTable Request");
+//
+//            // Create a new table on the server
+//            serverRef.spawnTable(dealer);
+//
+//            // Send back a dummy tableId for now (e.g., always 1)
+//            // Replace with actual table ID logic if needed later
+//            sendNetworkMessage(new Message.CreateTable.Response(true, 1));
+//        });
 
 
 
@@ -98,7 +106,7 @@ public class DealerClientThread extends ClientThreadWithHooks {
 
         // Handle LOBBY DATA Request — returns info about all tables and current activity
         addMessageHook(Message.LobbyData.Request.class, (req) -> {
-            System.out.println("Lobby data request");
+            System.out.println("Lobby data request From DealerClientThread");
 
             // Fetch all table threads from the server
             TableThread[] tableThreads = serverRef.getTables();

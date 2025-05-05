@@ -1,5 +1,8 @@
 package server;
 
+import game.Dealer;
+import game.Player;
+import game.Table;
 import networking.AccountType;
 import networking.Message;
 
@@ -9,6 +12,9 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
 import dbHelper.CSVDatabaseHelper;
 
 public class Server {
@@ -28,6 +34,8 @@ public class Server {
     ServerSocket serverSocket;
     int port;
     boolean running;
+
+    private Map<String, Integer> mapOfTables = new HashMap<>();
 
     /**
      * @apiNote For internal use only for the main connection thread
@@ -102,8 +110,8 @@ public class Server {
                         // TODO: AccountType accountType = serverRef.db.getUserTypeFor(username);
 //                        AccountType accountType = AccountType.PLAYER;
                         ClientThreadWithHooks clientThread = switch (accountType) {
-                            case AccountType.PLAYER -> new PlayerClientThread(socket, serverRef, writer, reader);
-                            case AccountType.DEALER -> new DealerClientThread(socket, serverRef, writer, reader);
+                            case AccountType.PLAYER -> new PlayerClientThread(new Player(username,"0"),socket, serverRef, writer, reader);
+                            case AccountType.DEALER -> new DealerClientThread(new Dealer(username, password, 17), socket, serverRef, writer, reader);
                         };
                         writer.writeObject(new Message.Login.Response(true, accountType));
 
@@ -179,10 +187,10 @@ public class Server {
                 .filter(clientThreadWithHooks -> clientThreadWithHooks instanceof DealerClientThread)
                 .toArray();
     }
-    public ClientThreadWithHooks[] getPlayersInLobby() {
-        return (ClientThreadWithHooks[]) Arrays.stream(clientsInLobby)
+    public PlayerClientThread[] getPlayersInLobby() {
+        return (PlayerClientThread[]) Arrays.stream(clientsInLobby)
                 .filter(clientThreadWithHooks -> clientThreadWithHooks instanceof PlayerClientThread)
-                .toArray();
+                .toArray(PlayerClientThread[]::new);
     }
     // public Table getTableById(int tableId) {
     //     List<Table> filteredTables = Arrays.stream(tables).filter(tableThread -> tableThread.table.getTableId() == tableId).toList();
@@ -203,17 +211,39 @@ public class Server {
             System.err.println("tableId = " + tableId + " doesn't exist");
             return false;
         }
+        mapOfTables.put(clientThread.getPlayerUserName(),tableId);
         tables[tableId].addClientToTable(clientThread);
+        Player player = clientThread.getPlayer();
+        // assigning Player to table class
+        tables[tableId].getTable().addPlayer(player);
         return true;
     }
-    public void spawnTable() {
-        TableThread tableThread = new TableThread();
+    // this should return a tableThread for dealerClient to handle
+    public TableThread spawnTable(Dealer dealer) {
+        TableThread tableThread = new TableThread(dealer);
         tables[tablesSize++] = tableThread;
         new Thread(tableThread).start();
+        return tableThread;
     }
     public void broadcastNetworkMessageToTable(Message message) {
         for (ClientThreadWithHooks client : connectedClients) {
-            client.sendNetworkMessage(message);
+            if (client != null) {
+                client.sendNetworkMessage(message);
+            }
         }
+    }
+    public TableThread getTableByUsername(String username) {
+        Integer tableId = mapOfTables.get(username);
+        if (tableId == null) return null;
+        return tables[tableId];
+    }
+    public Message.LobbyData.Response handleLobbyDataRequest() {
+        Table[] activeTables = new Table[tablesSize];
+        for (int i = 0; i < tablesSize; i++) {
+            activeTables[i] = tables[i].getTable();
+        }
+        int playerCount = getPlayersInLobby().length;
+        int dealerCount = tablesSize; // since each table == one dealer
+        return new Message.LobbyData.Response(activeTables, playerCount, dealerCount);
     }
 }

@@ -1,6 +1,8 @@
 package game;
 
-public enum Suit {
+import java.io.Serializable;
+
+public enum Suit implements Serializable {
     CLUBS,
     HEARTS,
     SPADES,
