@@ -1,7 +1,7 @@
 package server;
 
 import game.Dealer;
-import game.Player;
+import game.Table;
 import networking.AccountType;
 import networking.Message;
 
@@ -11,6 +11,8 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
+import java.util.Objects;
+
 import dbHelper.CSVDatabaseHelper;
 
 public class Server {
@@ -60,7 +62,7 @@ public class Server {
         @Override
         public void run() {
             // system.out
-            System.out.println("Server listening on port 3333");
+            // System.out.println("Server listening on port 3333");
             try {
                 Message message;
                 while ((message = (Message) reader.readObject()) != null) {
@@ -107,6 +109,7 @@ public class Server {
                             case AccountType.PLAYER -> new PlayerClientThread(socket, serverRef, writer, reader);
                             case AccountType.DEALER -> new DealerClientThread(new Dealer(username, password, 17), socket, serverRef, writer, reader);
                         };
+                        // clientThread.setUsername(username);
                         writer.writeObject(new Message.Login.Response(true, accountType));
 
                         connectedClients[connectClientsSize++] = clientThread;
@@ -117,6 +120,11 @@ public class Server {
                 }
             } catch (IOException | ClassNotFoundException e) {
                 System.err.println("Error: " + e.getLocalizedMessage());
+            }
+            System.out.println("Connected clients");
+            for (int i = 0; i < connectClientsSize; i++) {
+                ClientThreadWithHooks client = connectedClients[i];
+                System.out.println(client.username);
             }
         }
     }
@@ -173,13 +181,16 @@ public class Server {
     }
     public void disconnectServer() {}
 
-    public TableThread[] getTables() {
+    public TableThread[] getTablesThreads() {
         return tables;
     }
-    public ClientThreadWithHooks[] getDealersInLobby() {
-        return (ClientThreadWithHooks[]) Arrays.stream(clientsInLobby)
+    public Table[] getTables() {
+        return Arrays.stream(tables).filter(Objects::nonNull).map(TableThread::getTable).toArray(Table[]::new);
+    }
+    public DealerClientThread[] getDealersInLobby() {
+        return Arrays.stream(clientsInLobby)
                 .filter(clientThreadWithHooks -> clientThreadWithHooks instanceof DealerClientThread)
-                .toArray();
+                .toArray(DealerClientThread[]::new);
     }
     public PlayerClientThread[] getPlayersInLobby() {
         return (PlayerClientThread[]) Arrays.stream(clientsInLobby)
@@ -209,9 +220,16 @@ public class Server {
         return true;
     }
     public void spawnTable(Dealer dealer) {
+        if (tablesSize == 10) return;
+
         TableThread tableThread = new TableThread(dealer);
         tables[tablesSize++] = tableThread;
         new Thread(tableThread).start();
+
+        for (int i = 0; i < clientsInLobbySize; i++) {
+            if (clientsInLobby[i] == null) continue;
+            clientsInLobby[i].sendNetworkMessage(new Message.LobbyData.Response(getTables(), getPlayersInLobby().length, getDealersInLobby().length));
+        }
     }
     public void broadcastNetworkMessageToTable(Message message) {
         for (ClientThreadWithHooks client : connectedClients) {
