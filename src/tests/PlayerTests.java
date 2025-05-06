@@ -1,3 +1,5 @@
+package tests;
+
 import game.Card;
 import game.Player;
 import game.Suit;
