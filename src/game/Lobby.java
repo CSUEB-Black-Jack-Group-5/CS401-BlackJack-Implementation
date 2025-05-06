@@ -31,8 +31,8 @@ public class Lobby {
 
     /* CREATES A NEW TABLE AT "THE END" OF THE ARRAY */
     public void addTable(Dealer dealer) {
-        tables[tableCount] = new Table();
-        tables[tableCount].setDealer(dealer);
+        tables[tableCount] = new Table(dealer);
+        // tables[tableCount].setDealer(dealer);
         tableCount++;
     }
 

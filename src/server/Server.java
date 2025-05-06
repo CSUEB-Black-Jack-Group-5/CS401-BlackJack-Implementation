@@ -1,6 +1,8 @@
 package server;
 
+import game.Dealer;
 import game.Player;
+import game.Table;
 import networking.AccountType;
 import networking.Message;
 
@@ -9,8 +11,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Hashtable;
+
 import dbHelper.CSVDatabaseHelper;
 
 public class Server {
@@ -22,7 +25,7 @@ public class Server {
 
     private Thread connectionThread;
 
-    private final ArrayList<TableThread> tables;
+    private final Hashtable<Integer, TableThread> tables;
     private int tablesSize;
 
     private CSVDatabaseHelper db;
@@ -104,8 +107,8 @@ public class Server {
                         // TODO: AccountType accountType = serverRef.db.getUserTypeFor(username);
 //                        AccountType accountType = AccountType.PLAYER;
                         ClientThreadWithHooks clientThread = switch (accountType) {
-                            case AccountType.PLAYER -> new PlayerClientThread(socket, serverRef, writer, reader);
-                            case AccountType.DEALER -> new DealerClientThread(socket, serverRef, writer, reader);
+                            case AccountType.PLAYER -> new PlayerClientThread(socket, serverRef, writer, reader, username);
+                            case AccountType.DEALER -> new DealerClientThread(socket, serverRef, writer, reader, username);
                         };
                         writer.writeObject(new Message.Login.Response(true, accountType));
 
@@ -153,7 +156,7 @@ public class Server {
         clientsInLobby = new ClientThreadWithHooks[10];
         clientsInLobbySize = 0;
 
-        tables = new ArrayList<TableThread>();
+        tables = new Hashtable<>();
         tablesSize = 0;
     }
     public void startServer() {
@@ -173,29 +176,26 @@ public class Server {
     }
     public void disconnectServer() {}
 
-    public TableThread[] getTables() {
-        TableThread[] arr = new TableThread[tables.size()];
-        arr = tables.toArray(arr);
+    public Table[] getTables() {
+        Table[] arr = new Table[tables.size()];
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = tables.get(i).getTable();
+        }
         return arr;
     }
     public ClientThreadWithHooks[] getDealersInLobby() {
-        return (ClientThreadWithHooks[]) Arrays.stream(clientsInLobby)
+        return  Arrays.stream(clientsInLobby)
                 .filter(clientThreadWithHooks -> clientThreadWithHooks instanceof DealerClientThread)
-                .toArray();
+                .toArray(DealerClientThread[]::new);
     }
-    // figure out what's wrong later
-    public ClientThreadWithHooks[] getPlayersInLobby() {
-        return (ClientThreadWithHooks[]) Arrays.stream(clientsInLobby)
+    public PlayerClientThread[] getPlayersInLobby() {
+        return  Arrays.stream(clientsInLobby)
                 .filter(clientThreadWithHooks -> clientThreadWithHooks instanceof PlayerClientThread)
-                .toArray();
+                .toArray(PlayerClientThread[]::new);
     }
-    public int getConnectClientsSize() {
-        return connectClientsSize;
+    public Table getTableById(int tableId) {
+        return tables.get(tableId).getTable();
     }
-    public int getClientsInLobbySize() {
-        return clientsInLobbySize;
-    }
-    // public Table getTableById(int tableId) {
     //     List<Table> filteredTables = Arrays.stream(tables).filter(tableThread -> tableThread.table.getTableId() == tableId).toList();
     //     if (filteredTables.size() == 0) return null;
     //     return filteredTables.get(0);
@@ -210,21 +210,44 @@ public class Server {
     //     return true;
     // }
     public boolean movePlayerClientToTable(PlayerClientThread clientThread, int tableId, Player player) {
+        // if the table doesn't exist, the operation fails
         if (tableId < 0 || tableId >= tablesSize) {
             System.err.println("tableId = " + tableId + " doesn't exist");
             return false;
+        // otherwise ->
         } else {
-            // table id's not the best for this tbh but whatever
-            tables.get(tableId).addClientToTable(clientThread);
-            tables.get(tableId).getTable().addPlayer(player);
+            TableThread tableThread = tables.get(tableId);
+            // moves the client to the tableThread
+            tableThread.addClientToTable(clientThread);
+            Table table = tables.get(tableId).getTable();
+            // adds the player to the table
+            table.addPlayer(player);
+
+            // updates the table data for everyone in the table
+            for (int i = 0; i < table.getPlayerCount(); i++) {
+                if (tableThread.getJoinedUsers()[i] == null) continue;
+                tableThread.getJoinedUsers()[i].sendNetworkMessage(new Message.TableData.Response(table.getPlayers(), table.getDealer(), table.getPlayerCount()));
+            }
         }
         return true;
     }
-    public TableThread spawnTable() {
-        TableThread tableThread = new TableThread();
-        tables.add(tableThread);
+    public TableThread spawnTable(DealerClientThread clientThread, Dealer dealer) {
+        // makes a new table thread
+        TableThread tableThread = new TableThread(dealer);
+        // adds the dealer client to an array of clients in the table thread
+        tableThread.addClientToTable(clientThread);
+        // stores the table thread in the hashtable in server
+        tables.put(tableThread.getTable().getTableId(), tableThread);
+        // starts the table thread
         new Thread(tableThread).start();
         tablesSize++;
+
+        // updates the lobby for every client
+        for (int i = 0; i < clientsInLobbySize; i++) {
+            if (clientsInLobby[i] == null) continue;
+            clientsInLobby[i].sendNetworkMessage(new Message.LobbyData.Response(getTables(), getPlayersInLobby().length, getDealersInLobby().length));
+        }
+
         return tableThread;
     }
     public void broadcastNetworkMessageToTable(Message message) {

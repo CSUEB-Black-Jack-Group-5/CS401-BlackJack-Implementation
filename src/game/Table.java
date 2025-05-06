@@ -26,8 +26,9 @@ public class Table implements Serializable {
     // maybe flag in the dealer class that triggers if they have a table open already?
     // actually i don't even know if we want this feature ^^ we'll deal with it later if we do want this
     /* CONSTRUCTOR */
-    public Table(){
+    public Table(Dealer dealer){
         this.tableId = idCount++;
+        this.dealer = dealer;
         this.players = new Player[PLAYER_LIMIT];
         this.playerCount = 0;
         this.turnTimer = new Timer(60);
@@ -65,9 +66,9 @@ public class Table implements Serializable {
         return this.isActive;
     }
 
-    public void setDealer(Dealer dealer) {
-        this.dealer = dealer;
-    }
+//    public void setDealer(Dealer dealer) {
+//        this.dealer = dealer;
+//    }
 
     /* CHECKS IF THE TABLE IS FULL */
     public boolean isFull() {

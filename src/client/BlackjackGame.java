@@ -1,6 +1,5 @@
 package client;
 
-import client.PlayerTable.PlayerTableBlackJack;
 import client.gui.BlackjackIntroGUI;
 import client.DealerLobbyGUI.DealerLobbyBlackJack;
 import client.PlayerLobbyGUI.PlayerLobbyBlackJack;
@@ -147,7 +146,9 @@ public class BlackjackGame {
 
         client.addMessageHook(Message.TableData.Response.class, (res) -> {
             System.out.println("TableData Response");
-            // Handle table data response
+            Message.TableData.Response tableDataResponse = (Message.TableData.Response) res;
+            // Handle table data response - update table UI
+            dealerTable.updateTableData(tableDataResponse);
         });
 
         // lobby pane instantiated here to avoid null arguments when calling for lobby data
@@ -162,6 +163,7 @@ public class BlackjackGame {
             playerLobby.getPlayerLobbyBlackJackPanel().handleJoinTableResponse(joinTableResponse);
 
             // Join the table requested
+            // System.out.println(res.getTable().toString());
             int tableId = res.getTableId();
             String dealerName = res.getDealerUsername();
             int playerPosition = res.getPlayerCount();
@@ -208,7 +210,9 @@ public class BlackjackGame {
 
         client.addMessageHook(Message.TableData.Response.class, (res) -> {
             System.out.println("TableData Response");
-            // Handle table data response
+            Message.TableData.Response tableDataResponse = (Message.TableData.Response) res;
+            // Handle table data response - update table UI
+            playerTable.updateTableData(tableDataResponse);
         });
 
         client.addMessageHook(Message.PlayerReady.Response.class, (res) -> {
