@@ -266,7 +266,7 @@ public class PlayerTableBlackJack extends JFrame {
         bottomPanel.setOpaque(false);
 
         // Create timer container
-        JPanel timerContainer = new JPanel(new BorderLayout(0, 5));
+        JPanel timerContainer = new JPanel(new BorderLayout(0, 5)); //
         timerContainer.setOpaque(false);
         JLabel timerTitle = new JLabel("TURN TIMER", SwingConstants.CENTER);
         timerTitle.setForeground(Color.WHITE);
