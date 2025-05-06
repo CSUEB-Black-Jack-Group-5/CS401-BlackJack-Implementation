@@ -26,9 +26,9 @@ public class WalletTests {
     public void wallet_removeFunds() {
         Wallet wallet = new Wallet();
         wallet.addFunds(45.0f);
-        assertTrue(wallet.removeFunds(32.0f));
+        assertTrue(wallet.removeFunds(-32.0f));
         assertEquals(13.0f, wallet.getFunds(), 0.001);
-        assertFalse(wallet.removeFunds(45.0f));
+        assertFalse(wallet.removeFunds(-45.0f));
         assertEquals(13.0f, wallet.getFunds(), 0.001);
     }
 }

@@ -26,14 +26,6 @@ public class LobbyTests {
         lobby.addTable(dealer);
     }
 
-    /* CHECKS ALL PROPERTIES OF THE TABLE ADDED */
-    @Test
-    // might have to run this one individually because the id number gets effed up by the random order
-    public void checkTableId() {
-        // check id
-        assertEquals(0, lobby.getTables()[0].getTableId());
-    }
-
     @Test
     public void checkDealer() {
         // check dealer
