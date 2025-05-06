@@ -1,6 +1,7 @@
 package game;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 /**
  * Timer class implementation based off the UML Diagram
@@ -36,10 +37,8 @@ public class Timer {
     }
 
     public boolean isTimeUp() {
-        if(endTime == null) {
-            return LocalDateTime.now().isAfter(endTime);
-        }
-        return false;
+        LocalDateTime now = LocalDateTime.now();
+        return now.isAfter(startTime.plusSeconds(this.duration));
     }
 
     public LocalDateTime getStartTime() {
