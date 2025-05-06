@@ -1,5 +1,7 @@
 package client.PlayerTable;
 
+import networking.Message;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
@@ -216,7 +218,7 @@ public class PlayerTableBlackJack extends JFrame {
         setupPlayerPositions(playingSurfacePanel);
 
         // Create dealer area
-        JPanel dealerAreaPanel = new JPanel(new BorderLayout(0, 5));
+        JPanel dealerAreaPanel = new JPanel(new BorderLayout(0, 0));
         dealerAreaPanel.setOpaque(false);
         dealerAreaPanel.add(dealerInfoPanel, BorderLayout.NORTH);
         dealerAreaPanel.add(dealerPanel, BorderLayout.CENTER);
@@ -313,16 +315,16 @@ public class PlayerTableBlackJack extends JFrame {
         playerPositionPanel.setOpaque(false);
 
         // Create player positions
-        for (int i = 0; i < maxPlayers; i++) {
-            boolean isCurrentPlayer = (i == playerPosition - 1);
-            boolean isOccupied = (i < occupancy);
+        for (int i = 1; i <= maxPlayers; i++) {
+            boolean isCurrentPlayer = (i == playerPosition);
+            boolean isOccupied = (i <= occupancy);
 
             // Only show the current player as occupied if they are in the occupancy count
-            if (isCurrentPlayer && i >= occupancy) {
+            if (isCurrentPlayer && i > occupancy) {
                 isOccupied = false;
             }
 
-            String posLabel = isCurrentPlayer ? "YOU" : "P" + (i + 1);
+            String posLabel = isCurrentPlayer ? "YOU" : "P" + (i);
             PlayerPositionPanel position = new PlayerPositionPanel(isOccupied, posLabel);
 
             // Store reference to current player's position
@@ -349,7 +351,7 @@ public class PlayerTableBlackJack extends JFrame {
     /// Calculate and set positions for players in a semi-circle
     private void positionPlayersInSemicircle(JPanel panel) {
         int playerCount = playerPositions.size();
-        int centerX = 450; // Center X coordinate
+        int centerX = 500; // Center X coordinate
         int centerY = 300; // Center Y coordinate
         int radius = 250;  // Radius of the semi-circle
 
@@ -427,5 +429,34 @@ public class PlayerTableBlackJack extends JFrame {
         });
 
         confirmDialog.setVisible(true);
+    }
+
+    public void refreshTable() {
+        occupancyLabel.setText("<html><b>PLAYERS:</b> " + occupancy + "/" + maxPlayers + "</html>");
+
+        for (int i = 0; i < maxPlayers; i++) {
+            if (i < occupancy) {
+                playerPositions.get(i).setOccupied(true);
+            } else {
+                playerPositions.get(i).setOccupied(false);
+            }
+        }
+    }
+
+    public void updateTableData(Message.TableData.Response tableDataResponse) {
+        /// Update the player table data
+        // update player count
+        occupancy = tableDataResponse.getPlayersJoined();
+
+        // update player position; can't figure it out though because getPlayers() keeps returning null
+//        for (int i = 0; i < occupancy; i++) {
+//            if (tableDataResponse.getPlayers()[i].getUsername().equals(playerName)) {
+//                playerPosition = i;
+//            }
+//        }
+
+        /// Refresh UI
+        refreshTable();
+
     }
 }

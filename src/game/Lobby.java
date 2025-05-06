@@ -4,7 +4,7 @@ public class Lobby {
     // not sure whether to transfer this into an array list or keep it as an array
     private Table[] tables;
     private int tableCount;
-    private static final int TABLE_LIMIT = 100;
+    private static final int TABLE_LIMIT = 10;
     // private ConnectionHandler connections according to the UML
     // figure out how to integrate with server connections / message response later?
 
@@ -32,6 +32,7 @@ public class Lobby {
     /* CREATES A NEW TABLE AT "THE END" OF THE ARRAY */
     public void addTable(Dealer dealer) {
         tables[tableCount] = new Table(dealer);
+        // tables[tableCount].setDealer(dealer);
         tableCount++;
     }
 

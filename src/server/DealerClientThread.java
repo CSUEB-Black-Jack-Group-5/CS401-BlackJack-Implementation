@@ -22,10 +22,10 @@ public class DealerClientThread extends ClientThreadWithHooks {
      * Constructor initializes the thread, registers message hooks, and prepares the dealer object.
      */
 
-    public DealerClientThread(Socket socket, Server serverRef, ObjectOutputStream writer, ObjectInputStream reader) {
+    public DealerClientThread(Socket socket, Server serverRef, ObjectOutputStream writer, ObjectInputStream reader, String username) {
         super(socket, writer, reader);
         this.serverRef = serverRef;
-        this.dealer = new Dealer("dealer1", "letmein", 17);  // Temporary dealer login
+        this.dealer = new Dealer(username, "letmein", 17);  // Temporary dealer login
 
         System.out.println("Spawned dealer thread");
 
@@ -56,11 +56,11 @@ public class DealerClientThread extends ClientThreadWithHooks {
             System.out.println("CreateTable Request");
 
             // Create a new table on the server
-            serverRef.spawnTable();
+            TableThread table = serverRef.spawnTable(this, dealer);
 
             // Send back a dummy tableId for now (e.g., always 1)
             // Replace with actual table ID logic if needed later
-            sendNetworkMessage(new Message.CreateTable.Response(true, 1));
+            sendNetworkMessage(new Message.CreateTable.Response(true, table.getTable()));
         });
 
 
@@ -101,20 +101,21 @@ public class DealerClientThread extends ClientThreadWithHooks {
             System.out.println("Lobby data request");
 
             // Fetch all table threads from the server
-            TableThread[] tableThreads = serverRef.getTables();
-            Table[] tables = new Table[tableThreads.length];
-
-            // Convert each TableThread to it's underlying Table object
-            for (int i = 0; i < tableThreads.length; i++) {
-                tables[i] = tableThreads[i] != null ? tableThreads[i].getTable() : null;
-            }
-
-            // Count active players using a helper method; use dealer ID for tracking
+            Table[] tables = serverRef.getTables();
+            // Count active players and dealers using a helper method
             int activePlayers = serverRef.getPlayersInLobby().length;
-            int dealerId = dealer.getDealerId();
+            int activeDealers = serverRef.getDealersInLobby().length;
+
+//            //-------------NOTE------------------
+//            // dummy vals to compile
+//            Table[] tables = new Table[1];
+//            tables[0] = new Table();
+//            tables[0].setDealer(dealer);
+//            int dummyPlayerCount = 6;
+//            int dummyDealerCount = 1;
 
             // Send lobby data response including table list and player/dealer count
-            sendNetworkMessage(new Message.LobbyData.Response(tables, activePlayers, dealerId));
+            sendNetworkMessage(new Message.LobbyData.Response(tables, activePlayers, activeDealers));
         });
 
         // Handle GAME DATA Request — sends current state of dealer + player hand
@@ -145,14 +146,14 @@ public class DealerClientThread extends ClientThreadWithHooks {
         addMessageHook(Message.TableData.Request.class, (req) -> {
             System.out.println("TableData request");
 
-
             // These are placeholders; we can replace with real table/game logic later
-            int tableId = 1;
-            int[] playerIds = new int[]{101, 102}; // Example hardcoded player IDs
-            int dealerId = dealer.getDealerId();
+            int tableId = req.getTableId();
+            Dealer dealer = serverRef.getTableById(tableId).getDealer();
+            Player[] players = serverRef.getTableById(tableId).getPlayers();
+            int playersJoined = serverRef.getTableById(tableId).getPlayerCount();
 
             // Respond with table metadata
-            sendNetworkMessage(new Message.TableData.Response(dealerId, playerIds, playerIds.length));
+            sendNetworkMessage(new Message.TableData.Response(players, dealer, playersJoined));
         });
     }
 
