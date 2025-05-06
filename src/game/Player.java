@@ -39,6 +39,7 @@ public class Player implements Serializable {
     }
 
     public void makeBet(float amount) {
+        if (wallet.getFunds() - amount < 0) return;
         this.wager = (int) amount;
         wallet.removeFunds(-amount);
     }
@@ -155,6 +156,10 @@ public class Player implements Serializable {
     public int getWins() { return wins; }
 
     public String getUsername() { return username; }
+
+    public int getWager() {
+        return wager;
+    }
 
     public int getLosses() { return losses; }
 
