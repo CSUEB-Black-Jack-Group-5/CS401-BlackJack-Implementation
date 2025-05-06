@@ -156,6 +156,10 @@ public class Player implements Serializable {
 
     public String getUsername() { return username; }
 
+    public int getWager() {
+        return wager;
+    }
+
     public int getLosses() { return losses; }
 
     public void incrementWins() {

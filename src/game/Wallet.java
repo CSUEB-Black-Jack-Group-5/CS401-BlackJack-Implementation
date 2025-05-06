@@ -30,7 +30,7 @@ public class Wallet implements Serializable {
     /**
      * @return The total funds amount of this wallet
      */
-    float getFunds() {
+    public float getFunds() {
         return funds;
     }
 }
