@@ -29,6 +29,7 @@ public class Shoe implements Serializable {
     }
     public Card dealCard(){
         // TODO: Implement dealing logic
+        if(numCards==0)return null;
         // shoe should never be empty so no need to throw an exception
         Card topCard = extendedDeck[numCards-1];
         numCards--;

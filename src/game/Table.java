@@ -4,10 +4,7 @@ package game;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Table implements Serializable {
     protected static int idCount = 0;
@@ -51,7 +48,7 @@ public class Table implements Serializable {
     }
 
     public Player[] getPlayers() {
-        return players;
+        return Arrays.stream(players).filter(Objects::nonNull).toArray(Player[]::new);
     }
 
     public int getPlayerCount() {
@@ -184,6 +181,9 @@ public class Table implements Serializable {
 
         resetTable();
     }
+    public void StartGame(){
+
+    }
 
     /* RESETS THE TABLE STATE */
     public void resetTable() {
@@ -217,12 +217,11 @@ public class Table implements Serializable {
         mapOfHands.put(userName, hand);
     }
 
-    public CardHand dealInitialCards(String userName) {
+    public void dealInitialCards(String userName) {
         CardHand hand = new CardHand(21);
         hand.addCard(dealer.getShoe().dealCard());
         hand.addCard(dealer.getShoe().dealCard());
         mapOfHands.put(userName, hand);
-        return hand;
     }
 
     /* IF DEALER LEAVES, CALL THIS METHOD TO LOG TABLE DATA */

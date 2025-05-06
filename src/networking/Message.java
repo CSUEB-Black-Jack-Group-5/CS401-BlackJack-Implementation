@@ -536,17 +536,51 @@ public class Message implements Serializable {
     /* Player Bet Method */
     public static class Bet {
         public static class Request extends Message {
-            public Request() {}
+            private final int amount;
+            public Request(int amount) {
+                this.amount = amount;
+            }
+
         }
 
         public static class Response extends Message {
-            public final int amount;
+            private boolean status;
 
-            public Response(int amount) {
-                this.amount = amount;
+            public Response(boolean status) {
+                this.status = status;
             }
-            public int getAmount(){
-                return this.amount;
+            public boolean getStatus(){
+                return status;
+            }
+        }
+    }
+    /* Player Request an Action */
+    public static class PlayerAction{
+        public static class Request extends Message{
+            private String userName;
+            private String action;
+            public Request(String userName,String action){
+                this.userName = userName;
+                this.action = action;
+            }
+            public String getUserName(){
+                return this.userName;
+            }
+            public String getAction(){
+                return this.action;
+            }
+
+
+        }
+        public static class Response extends Message {
+            private boolean status;
+
+            public Response(boolean status) {
+                this.status = status;
+            }
+
+            public boolean getStatus() {
+                return this.status;
             }
         }
     }

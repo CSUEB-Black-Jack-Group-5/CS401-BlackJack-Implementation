@@ -7,9 +7,12 @@ import networking.Message;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.Scanner;
 
 public class PlayerClientThread extends ClientThreadWithHooks {
     private final Player player;
+
+
     public PlayerClientThread(Player player, Socket socket, Server server, ObjectOutputStream writer, ObjectInputStream reader) {
         super(socket, writer, reader);
         this.player = player;
@@ -158,11 +161,11 @@ public class PlayerClientThread extends ClientThreadWithHooks {
             sendNetworkMessage(new Message.DoubleDown.Response(dummyWager,dummyStatus));
         });
 
-        addMessageHook(Message.Bet.Response.class, (res) -> {
-            String username = this.username;
-            int bet = res.getAmount();
+        addMessageHook(Message.Bet.Request.class, (res) -> {
+            String username = getPlayerUserName();
+//            int bet = res.getAmount();
 
-            TableThread tableThread = server.getTableByUsername(username); // implement this or pass reference
+            TableThread tableThread = server.getTableByUsername(username);
             tableThread.placeBet(username, bet);
 
             System.out.println("Received bet from " + username + ": $" + bet);
@@ -173,6 +176,20 @@ public class PlayerClientThread extends ClientThreadWithHooks {
 
             }
         });
+        addMessageHook(Message.PlayerAction.Request.class, (Message msg) -> {
+            Message.PlayerAction.Request request = (Message.PlayerAction.Request) msg;
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("It's your turn, " + request.getUserName() + "! Enter 'hit' or 'stand':");
+
+            player.setLastAction(scanner.nextLine().trim().toLowerCase());
+            if (!player.getLastAction().equals("hit") && !player.getLastAction().equals("stand")) {
+                System.out.println("Invalid input. Defaulting to 'stand'.");
+                player.setLastAction("stand");
+            }
+
+
+            sendNetworkMessage(new Message.PlayerAction.Request(request.getUserName(), player.getLastAction()));
+        });
         showMessageHooks();
     }
     public String getPlayerUserName(){
@@ -181,4 +198,5 @@ public class PlayerClientThread extends ClientThreadWithHooks {
     public Player getPlayer(){
         return player;
     }
+
 }

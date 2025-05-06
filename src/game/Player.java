@@ -15,6 +15,8 @@ public class Player implements Serializable {
     private String userId;   // UserId format: "u001"
     private int wins; // added for database records
     private int losses;
+    private boolean hasBet;
+    private String lastAction;
 
     public Player(String username, String userId) {
         this.playerId = ++idCount;
@@ -28,6 +30,9 @@ public class Player implements Serializable {
         this.wallet = new Wallet();
         this.wins = 0;
         this.losses = 0;
+        this.hasBet = false;
+        this.lastAction = "stand";
+
     }
 
     public void setReady(boolean ready) {
@@ -164,6 +169,30 @@ public class Player implements Serializable {
 
     public void incrementLosses() {
         losses++;
+    }
+    public void setHasBet(boolean bet){
+        this.hasBet = bet;
+    }
+    public boolean getHasBet(){
+        return hasBet;
+    }
+    public void handlePlayerAction(String action) {
+        this.lastAction = action;
+    }
+
+    public void handlePlayerBet(int bet) {
+        this.wager = bet;
+    }
+    public String getLastAction(){
+        String tmp = lastAction;
+        this.lastAction = null;
+        return tmp;
+    }
+    public void setLastAction(String action){
+        this.lastAction = action;
+    }
+    public int getCurrentBet(){
+        return wager;
     }
 }
 

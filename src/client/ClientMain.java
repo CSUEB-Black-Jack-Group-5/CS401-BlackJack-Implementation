@@ -32,10 +32,6 @@ public class ClientMain {
         AtomicBoolean loginComplete = new AtomicBoolean(false);
 
         client.addMessageHook(Message.LobbyData.Response.class, (res)->{
-//            System.out.println("# of tables "+ res.getTables().length);
-//            System.out.println("# of d "+ res.getDealerCount());
-//            System.out.println("# of p "+ res.getPlayerCount());
-//            System.out.println("Table length: " + res.getTables().length);
 
             // we have to do it this way because we set the tables to a fixed size of 10
             System.out.println("Displaying all the Tables ");
@@ -77,13 +73,6 @@ public class ClientMain {
             }else {
                 System.out.println("Failed Joining a Table");
             }
-        });
-
-        client.addMessageHook(Message.Bet.Request.class,(req)->{
-
-            System.out.println("Please enter your bet amount:");
-            int bet = Integer.parseInt(scanner.nextLine());
-            client.sendNetworkMessage(new Message.Bet.Response(bet));
         });
 
 
@@ -155,12 +144,60 @@ public class ClientMain {
                     System.out.println("Goodbye!");
                     showMenu = false;
                     return;
+                case "3":
+                    System.out.println("Please enter your bet amount:");
+                    int bet = Integer.parseInt(scanner.nextLine());
+                    client.sendNetworkMessage(new Message.Bet.Response(bet));
+                    break;
                 default:
                     System.out.println("Invalid choice.");
+
+
             }
         }
     }
-
+//    public static void handleInGameMenu(ClientWithHooks client, Scanner scanner,String userName) {
+//        boolean inGame = true;
+//
+//        while (inGame) {
+//            System.out.println("\nGame Menu:");
+//            System.out.println("1. Place a Bet");
+//            System.out.println("2. Hit");
+//            System.out.println("3. Stand");
+//            System.out.println("4. Exit Table");
+//
+//            String input = scanner.nextLine();
+//
+//            switch (input) {
+//                case "1":
+//                    System.out.println("Enter your bet amount:");
+//                    try {
+//                        int bet = Integer.parseInt(scanner.nextLine());
+//                        client.sendNetworkMessage(new Message.Bet.Response(bet));
+//                    } catch (NumberFormatException e) {
+//                        System.out.println("Invalid number.");
+//                    }
+//                    break;
+//
+//                case "2":
+//                    client.sendNetworkMessage(new Message.PlayerAction.Request(userName,"hit"));
+//                    break;
+//
+//                case "3":
+//                    client.sendNetworkMessage(new Message.PlayerAction.Request(userName,"stand"));
+//                    break;
+//
+//                case "4":
+//                    System.out.println("Leaving the table...");
+//                    client.sendNetworkMessage(new Message.LeaveTable.Request());
+//                    inGame = false;
+//                    break;
+//
+//                default:
+//                    System.out.println("Invalid input.");
+//            }
+//        }
+//    }
 }
 //SwingUtilities.invokeLater(() -> {
 //            client = new ClientWithHooks("localhost", 3333);
