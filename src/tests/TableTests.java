@@ -27,8 +27,8 @@ public class TableTests {
     @BeforeClass
     public static void setUp() {
         // Initialize a Table object before each test
-        table = new Table();
-        table.setDealer(dealer);
+        table = new Table(dealer);
+        // table.setDealer(dealer);
     }
 
     /* CHECKS ALL PROPERTIES OF THE TABLE ADDED */
