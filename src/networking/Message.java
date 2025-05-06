@@ -26,6 +26,7 @@ public class Message implements Serializable {
                 return password;
             }
         }
+
         public static class Response extends Message {
             private boolean status;
             private AccountType type;
@@ -44,6 +45,7 @@ public class Message implements Serializable {
             }
         }
     }
+
     /* Create Account Method */
     public static class CreateAccount {
         public static class Request extends Message {
@@ -63,6 +65,7 @@ public class Message implements Serializable {
                 return password;
             }
         }
+
         public static class Response extends Message {
             private boolean status;
 
@@ -75,6 +78,7 @@ public class Message implements Serializable {
             }
         }
     }
+
     /* Join Table Method */     // not properly UMLed yet; this is my attempt at implementation
     public static class JoinTable {
         public static class Request extends Message {
@@ -94,18 +98,42 @@ public class Message implements Serializable {
                 return tableId;
             }
         }
+
         public static class Response extends Message {
             private boolean status;
+            private Table table;
 
-            public Response(boolean status) {
+            public Response(boolean status, Table table) {
                 this.status = status;
+                this.table = table;
             }
 
             public boolean getStatus() {
                 return status;
             }
+
+            public Table getTable() {
+                return table;
+            }
+
+            public int getTableId() {
+                return table.getTableId();
+            }
+
+            public String getDealerUsername() {
+                return table.getDealer().getUsername();
+            }
+
+            public int getPlayerCount() {
+                return table.getPlayerCount();
+            }
+
+            public int getPlayerLimit() {
+                return table.getPlayerLimit();
+            }
         }
     }
+
     /* Create Table Method */
     public static class CreateTable {
         public static class Request extends Message {
@@ -119,24 +147,42 @@ public class Message implements Serializable {
                 return dealerId;
             }
         }
+
         public static class Response extends Message {
             private boolean status;
-            private int tableId;        // how come tableId is an int but dealerId is a string according to UML?
+            private Table table;
 
-            public Response(boolean status, int tableId) {
+            public Response(boolean status, Table table) {
                 this.status = status;
-                this.tableId = tableId;
+                this.table = table;
             }
 
             public boolean getStatus() {
                 return status;
             }
 
+            public Table getTable() {
+                return table;
+            }
+
             public int getTableId() {
-                return tableId;
+                return table.getTableId();
+            }
+
+            public String getDealerUsername() {
+                return table.getDealer().getUsername();
+            }
+
+            public int getPlayerCount() {
+                return table.getPlayerCount();
+            }
+
+            public int getPlayerLimit() {
+                return table.getPlayerLimit();
             }
         }
     }
+
     /* Deal Method */
     public static class Deal {
         public static class Request extends Message {
@@ -150,6 +196,7 @@ public class Message implements Serializable {
                 return tableId;
             }
         }
+
         public static class Response extends Message {
             private boolean status;
 
@@ -162,6 +209,7 @@ public class Message implements Serializable {
             }
         }
     }
+
     /* Hit Method */            // not properly UMLed yet; this is my attempt at implementation
     public static class Hit {
         public static class Request extends Message {
@@ -181,6 +229,7 @@ public class Message implements Serializable {
                 return deck;
             }
         }
+
         public static class Response extends Message {
             private Card draw;
             private CardHand hand;
@@ -205,6 +254,7 @@ public class Message implements Serializable {
             }
         }
     }
+
     /* Stand Method */          // not properly UMLed yet; this is my attempt at implementation
     public static class Stand {
         public static class Request extends Message {
@@ -218,6 +268,7 @@ public class Message implements Serializable {
                 return playerId;
             }
         }
+
         public static class Response extends Message {
             // unsure if the hand is necessary for stand, but i implemented it just in case
             private CardHand hand;
@@ -237,6 +288,7 @@ public class Message implements Serializable {
             }
         }
     }
+
     /* Split Method */          // not properly UMLed yet; this is my attempt at implementation
     public static class Split {
         public static class Request extends Message {
@@ -256,6 +308,7 @@ public class Message implements Serializable {
                 return hand;
             }
         }
+
         public static class Response extends Message {
             private CardHand hand;
             private CardHand splitHand;
@@ -280,6 +333,7 @@ public class Message implements Serializable {
             }
         }
     }
+
     /* Double Down Method */    // not properly UMLed yet; this is my attempt at implementation
     public static class DoubleDown {
         public static class Request extends Message {
@@ -299,6 +353,7 @@ public class Message implements Serializable {
                 return wager;
             }
         }
+
         public static class Response extends Message {
             private int wager;
             private boolean status;
@@ -317,6 +372,7 @@ public class Message implements Serializable {
             }
         }
     }
+
     /* Lobby Data Method */
     public static class LobbyData {
         public static class Request extends Message {
@@ -336,6 +392,7 @@ public class Message implements Serializable {
                 return type;
             }
         }
+
         public static class Response extends Message {
             private Table[] tables;
             private int playerCount;
@@ -360,6 +417,7 @@ public class Message implements Serializable {
             }
         }
     }
+
     /* Table Data Method */     // not properly UMLed yet; this is my attempt at implementation
     public static class TableData {
         public static class Request extends Message {
@@ -373,6 +431,7 @@ public class Message implements Serializable {
                 return dealerId;
             }
         }
+
         public static class Response extends Message {
             private int dealerId;
             private int[] playerIds;
@@ -397,6 +456,7 @@ public class Message implements Serializable {
             }
         }
     }
+
     /* Game Data Method */
     public static class GameData {
         public static class Request extends Message {
@@ -410,6 +470,7 @@ public class Message implements Serializable {
                 return playerId;
             }
         }
+
         public static class Response extends Message {
             private CardHand playerHand;
             private CardHand dealerHand;
@@ -428,12 +489,14 @@ public class Message implements Serializable {
             }
         }
     }
+
     /* Clock Sync Method */
     public static class ClockSync {
         public static class Request extends Message {
             public Request() {
             }
         }
+
         public static class Response extends Message {
             private float clockTime;
 
@@ -446,6 +509,7 @@ public class Message implements Serializable {
             }
         }
     }
+
     /* Player Ready Method */
     public static class PlayerReady {
         public static class Request extends Message {
@@ -459,6 +523,7 @@ public class Message implements Serializable {
                 return username;
             }
         }
+
         public static class Response extends Message {
             private boolean status;
 
@@ -471,6 +536,7 @@ public class Message implements Serializable {
             }
         }
     }
+
     /* Player Leave Method */
     public static class PlayerLeave {
         public static class Request extends Message {
@@ -490,6 +556,7 @@ public class Message implements Serializable {
                 return tableId;
             }
         }
+
         public static class Response extends Message {
             private boolean status;
 
@@ -502,6 +569,7 @@ public class Message implements Serializable {
             }
         }
     }
+
     /* Dealer Leave Method */
     public static class DealerLeave {
         public static class Request extends Message {
@@ -521,6 +589,7 @@ public class Message implements Serializable {
                 return tableId;
             }
         }
+
         public static class Response extends Message {
             private boolean status;
 

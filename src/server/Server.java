@@ -1,5 +1,6 @@
 package server;
 
+import game.Player;
 import networking.AccountType;
 import networking.Message;
 
@@ -8,7 +9,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Arrays;
+import dbHelper.CSVDatabaseHelper;
 
 public class Server {
     // Client threads
@@ -19,10 +22,10 @@ public class Server {
 
     private Thread connectionThread;
 
-    private final TableThread[] tables;
+    private final ArrayList<TableThread> tables;
     private int tablesSize;
 
-    // private Database db;
+    private CSVDatabaseHelper db;
 
     ServerSocket serverSocket;
     int port;
@@ -41,6 +44,7 @@ public class Server {
         ObjectInputStream reader;
         ObjectOutputStream writer;
         Server serverRef;
+        AccountType accountType;
         public ClientLoginHandler(Socket socket, Server serverRef) {
             this.socket = socket;
             this.serverRef = serverRef;
@@ -55,6 +59,8 @@ public class Server {
 
         @Override
         public void run() {
+            // system.out
+            System.out.println("Server listening on port 3333");
             try {
                 Message message;
                 while ((message = (Message) reader.readObject()) != null) {
@@ -81,15 +87,28 @@ public class Server {
                         String username = loginRequest.getUsername();
                         String password = loginRequest.getPassword();
 
+                        // Still have not done the checking still trying to figure out how to send the
+                        // request via client side.
+                        if(CSVDatabaseHelper.dealerExists(username,password)){
+                            accountType = AccountType.DEALER;
+                        }
+                        else if(CSVDatabaseHelper.playerExists(username,password)){
+                            accountType = AccountType.PLAYER;
+                        }
+                        if (accountType == null) {
+                            writer.writeObject(new Message.Login.Response(false, null));
+                            return;
+                        }
                         // TODO: if (!checkCredentials(username, password))
                         //          writer.writeObject(Message.Login.Response(/* fail status */));
                         // TODO: AccountType accountType = serverRef.db.getUserTypeFor(username);
-                        AccountType accountType = AccountType.PLAYER;
+//                        AccountType accountType = AccountType.PLAYER;
                         ClientThreadWithHooks clientThread = switch (accountType) {
                             case AccountType.PLAYER -> new PlayerClientThread(socket, serverRef, writer, reader);
                             case AccountType.DEALER -> new DealerClientThread(socket, serverRef, writer, reader);
                         };
                         writer.writeObject(new Message.Login.Response(true, accountType));
+
                         connectedClients[connectClientsSize++] = clientThread;
                         clientsInLobby[clientsInLobbySize++] = clientThread;
                         new Thread(clientThread).start();
@@ -134,7 +153,7 @@ public class Server {
         clientsInLobby = new ClientThreadWithHooks[10];
         clientsInLobbySize = 0;
 
-        tables = new TableThread[10];
+        tables = new ArrayList<TableThread>();
         tablesSize = 0;
     }
     public void startServer() {
@@ -155,17 +174,26 @@ public class Server {
     public void disconnectServer() {}
 
     public TableThread[] getTables() {
-        return tables;
+        TableThread[] arr = new TableThread[tables.size()];
+        arr = tables.toArray(arr);
+        return arr;
     }
     public ClientThreadWithHooks[] getDealersInLobby() {
         return (ClientThreadWithHooks[]) Arrays.stream(clientsInLobby)
                 .filter(clientThreadWithHooks -> clientThreadWithHooks instanceof DealerClientThread)
                 .toArray();
     }
+    // figure out what's wrong later
     public ClientThreadWithHooks[] getPlayersInLobby() {
         return (ClientThreadWithHooks[]) Arrays.stream(clientsInLobby)
                 .filter(clientThreadWithHooks -> clientThreadWithHooks instanceof PlayerClientThread)
                 .toArray();
+    }
+    public int getConnectClientsSize() {
+        return connectClientsSize;
+    }
+    public int getClientsInLobbySize() {
+        return clientsInLobbySize;
     }
     // public Table getTableById(int tableId) {
     //     List<Table> filteredTables = Arrays.stream(tables).filter(tableThread -> tableThread.table.getTableId() == tableId).toList();
@@ -181,18 +209,23 @@ public class Server {
 
     //     return true;
     // }
-    public boolean movePlayerClientToTable(PlayerClientThread clientThread, int tableId) {
+    public boolean movePlayerClientToTable(PlayerClientThread clientThread, int tableId, Player player) {
         if (tableId < 0 || tableId >= tablesSize) {
             System.err.println("tableId = " + tableId + " doesn't exist");
             return false;
+        } else {
+            // table id's not the best for this tbh but whatever
+            tables.get(tableId).addClientToTable(clientThread);
+            tables.get(tableId).getTable().addPlayer(player);
         }
-        tables[tableId].addClientToTable(clientThread);
         return true;
     }
-    public void spawnTable() {
+    public TableThread spawnTable() {
         TableThread tableThread = new TableThread();
-        tables[tablesSize++] = tableThread;
+        tables.add(tableThread);
         new Thread(tableThread).start();
+        tablesSize++;
+        return tableThread;
     }
     public void broadcastNetworkMessageToTable(Message message) {
         for (ClientThreadWithHooks client : connectedClients) {
