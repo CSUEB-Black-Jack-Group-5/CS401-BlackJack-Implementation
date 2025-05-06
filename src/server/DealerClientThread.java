@@ -146,7 +146,6 @@ public class DealerClientThread extends ClientThreadWithHooks {
         addMessageHook(Message.TableData.Request.class, (req) -> {
             System.out.println("TableData request");
 
-
             // These are placeholders; we can replace with real table/game logic later
             int tableId = req.getTableId();
             Dealer dealer = serverRef.getTableById(tableId).getDealer();

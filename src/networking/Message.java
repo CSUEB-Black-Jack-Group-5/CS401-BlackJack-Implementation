@@ -1,10 +1,8 @@
 package networking;
 
 import java.io.Serializable;
-import game.Card;
-import game.CardHand;
-import game.Shoe;
-import game.Table;
+
+import game.*;
 
 public class Message implements Serializable {
     /* Login Method */

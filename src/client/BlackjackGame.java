@@ -99,7 +99,6 @@ public class BlackjackGame {
     }
 
     private static void setupDealerHooks() {
-
         client.addMessageHook(Message.CreateTable.Response.class, (res) -> {
             System.out.println("CreateTable Response");
 
@@ -169,7 +168,7 @@ public class BlackjackGame {
             int playerPosition = res.getPlayerCount();
             int occupancy = res.getPlayerCount();
             int maxPlayers = res.getPlayerLimit();
-            String playerName = "dummy_value";
+            String playerName = res.getPlayerUsername();
             playerTable = new PlayerTableBlackJack(tableId, dealerName, playerPosition, occupancy, maxPlayers, playerName);
 
             // Hide the Player Lobby GUI if it's still visible
