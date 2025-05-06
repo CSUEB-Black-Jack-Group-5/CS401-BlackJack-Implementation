@@ -1,19 +1,18 @@
 import game.*;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
 
 /**
  * Simple unit tests for the Shoe class.
  */
 public class ShoeTests {
 
-    private Shoe shoe;
+    private static Shoe shoe;
 
-    @BeforeEach
-    public void setUp() {
+    @BeforeClass
+    public static void setUp() {
         shoe = new Shoe(1); // one deck = 52 cards
     }
 
@@ -43,8 +42,10 @@ public class ShoeTests {
 
     @Test
     public void testShuffleDoesNotCrash() {
-        // Shuffling should not throw an exception
-        assertDoesNotThrow(() -> shoe.shuffle());
+        String beforeShuffle = shoe.toString();
+        shoe.shuffle();
+        String afterShuffle = shoe.toString();
+        assertNotEquals(beforeShuffle, afterShuffle);
     }
 
     @Test

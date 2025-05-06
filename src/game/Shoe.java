@@ -62,4 +62,12 @@ public class Shoe implements Serializable {
         }
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < numCards; i++) {
+            sb.append("[").append(extendedDeck[i].getSuit()).append(",").append(extendedDeck[i].getValue()).append("]");
+        }
+        return sb.toString();
+    }
 }
