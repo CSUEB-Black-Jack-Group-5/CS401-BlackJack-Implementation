@@ -14,7 +14,7 @@ public class TestGuiMain {
         client.addMessageHook(Message.CreateAccount.Response.class, (response) -> {});
         client.addMessageHook(Message.Login.Response.class, (response) -> {
             switch (response.getType()) {
-                case AccountType.DEALER: {
+                case DEALER: {
                     client.addMessageHook(Message.CreateTable.Response.class, (res2) -> {
                         System.out.println("CreateTable Response");
                     });
@@ -40,7 +40,7 @@ public class TestGuiMain {
                     testGui.showDealer();
                 }
                 break;
-                case AccountType.PLAYER: {
+                case PLAYER: {
                     client.addMessageHook(Message.JoinTable.Response.class, (req) -> {
                         System.out.println("JoinTable Response");
                     });

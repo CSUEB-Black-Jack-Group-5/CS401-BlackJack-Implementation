@@ -41,17 +41,18 @@ public class TestGuiFrame extends JFrame {
             client.sendNetworkMessage(new Message.JoinTable.Request(playerId, tableId));
         }).build());
         playerPanel.add(new TestMessagePanel.Builder().setText("Hit").setButtonListener((ctx) -> {
-            int playerId = 0;
+            String playername = "John";
             Shoe shoe = new Shoe(1);
-            client.sendNetworkMessage(new Message.Hit.Request(playerId, shoe)); // NOTE: Hit.Request currerntly takes an unecessary Shoe in the constructor
+            client.sendNetworkMessage(new Message.Hit.Request(playername, shoe)); // NOTE: Hit.Request currerntly takes an unecessary Shoe in the constructor
         }).build());
         playerPanel.add(new TestMessagePanel.Builder().setText("Stand").setButtonListener((ctx) -> {
             int playerId = 0;
             client.sendNetworkMessage(new Message.Stand.Request(playerId));
         }).build());
         playerPanel.add(new TestMessagePanel.Builder().setText("Ready").setButtonListener((ctx) -> {
-            String playerId = ""; // TODO: We need to decide whether playerId is a String or Integer (See line 51)
-            client.sendNetworkMessage(new Message.PlayerReady.Request(playerId));
+            String playerId = "";
+            int tableId = 0;// TODO: We need to decide whether playerId is a String or Integer (See line 51)
+            client.sendNetworkMessage(new Message.PlayerReady.Request(playerId, tableId));
         }).build());
         playerPanel.add(new TestMessagePanel.Builder().setText("PlayerLeave").setButtonListener((ctx) -> {
             int playerId = 0; // TODO: We need to somehow tell the client what its id is for this request

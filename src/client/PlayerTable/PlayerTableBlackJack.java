@@ -1,10 +1,19 @@
 package client.PlayerTable;
 
+import client.BlackjackGame;
+import game.Card;
+import game.Suit;
+import game.Value;
+import networking.Message;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 
-/// Main class for the Blackjack Player Table GUI
+/**
+ * Main class for the Blackjack Player Table GUI
+ * Implements proper server communication and synchronization with dealer view
+ */
 public class PlayerTableBlackJack extends JFrame {
     /// Main panels
     private JPanel mainPanel;
@@ -47,11 +56,16 @@ public class PlayerTableBlackJack extends JFrame {
     private String playerName;
 
     /// Chip count and bet amount for the player
-    /// Maybe this chip can be change in your funds
-    private int chipCount = 1000; /// Default starting chips
+    private int chipCount = 1000; // Default starting chips
     private int currentBet = 0;
     private JLabel chipsLabel;
     private JLabel betLabel;
+
+    /// Game state tracking
+    private boolean isPlayerTurn = false;
+    private boolean hasBlackjack = false;
+    private boolean hasBusted = false;
+    private boolean roundComplete = false;
 
     /// Constructor for the PlayerTableBlackJack class
     public PlayerTableBlackJack(int tableId, String dealerName, int playerPosition, int occupancy, int maxPlayers, String playerName) {
@@ -68,6 +82,7 @@ public class PlayerTableBlackJack extends JFrame {
         initComponents();
         setupLayout();
         setupListeners();
+        setupMessageHooks();
 
         // Show the table
         setVisible(true);
@@ -134,7 +149,6 @@ public class PlayerTableBlackJack extends JFrame {
             timerBox.add(timerLabels[i], BorderLayout.CENTER);
             timerPanel.add(timerBox);
         }
-        // updateTimerDisplay(15); // Default time count maybe server will do it
 
         // Create player's cards panel
         myCardsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
@@ -151,7 +165,7 @@ public class PlayerTableBlackJack extends JFrame {
         hitButton.setEnabled(false);
         standButton.setEnabled(false);
         doubleDownButton.setEnabled(false);
-        readyButton.setEnabled(false);
+        readyButton.setEnabled(true); // Ready button enabled initially
 
         // Create chip and bet labels
         chipsLabel = new JLabel("Your Funds: $" + chipCount, SwingConstants.CENTER);
@@ -377,11 +391,503 @@ public class PlayerTableBlackJack extends JFrame {
     private void setupListeners() {
         // Leave button action
         leaveButton.addActionListener(e -> showLeaveConfirmation());
+
+        // Ready button action
+        readyButton.addActionListener(e -> {
+            System.out.println("Ready button pressed");
+
+            // Disable the Ready button once clicked
+            readyButton.setEnabled(false);
+
+            if (currentPlayerPosition != null) {
+                currentPlayerPosition.setReady(true);
+                currentPlayerPosition.repaint();
+            }
+
+            // Send PlayerReady request to server
+            Message.PlayerReady.Request request = new Message.PlayerReady.Request(playerName, tableId);
+            BlackjackGame.client.sendNetworkMessage(request);
+        });
+
+        // Hit button action
+        hitButton.addActionListener(e -> {
+            // Send hit request to dealer
+            Message.Hit.Request request = new Message.Hit.Request(playerName, null);
+            BlackjackGame.client.sendNetworkMessage(request);
+
+            // Disable buttons until response received
+            hitButton.setEnabled(false);
+            standButton.setEnabled(false);
+            doubleDownButton.setEnabled(false);
+        });
+
+        // Stand button action
+        standButton.addActionListener(e -> {
+            // Send stand request to dealer
+            Message.Stand.Request request = new Message.Stand.Request(playerName, tableId);
+            BlackjackGame.client.sendNetworkMessage(request);
+
+            // Disable all gameplay buttons - round is over for this player
+            hitButton.setEnabled(false);
+            standButton.setEnabled(false);
+            doubleDownButton.setEnabled(false);
+
+            // Update game state
+            isPlayerTurn = false;
+
+            // Show waiting message
+            JOptionPane.showMessageDialog(this,
+                    "You chose to stand. Waiting for dealer's turn.",
+                    "Stand", JOptionPane.INFORMATION_MESSAGE);
+        });
+
+        // Double Down button action
+        doubleDownButton.addActionListener(e -> {
+            // Check if player has enough funds
+            if (chipCount < currentBet) {
+                JOptionPane.showMessageDialog(this,
+                        "You don't have enough funds to double down.",
+                        "Insufficient Funds", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Deduct additional bet amount
+            chipCount -= currentBet;
+            currentBet *= 2;
+
+            // Update UI
+            chipsLabel.setText("Your Funds: $" + chipCount);
+            betLabel.setText("Bet: $" + currentBet);
+
+            // Send double down request to dealer
+            Message.DoubleDown.Request request = new Message.DoubleDown.Request(
+                    playerName, currentBet, tableId);
+            BlackjackGame.client.sendNetworkMessage(request);
+
+            // Disable all gameplay buttons - round is over for this player after double down
+            hitButton.setEnabled(false);
+            standButton.setEnabled(false);
+            doubleDownButton.setEnabled(false);
+
+            // Update game state
+            isPlayerTurn = false;
+        });
     }
 
-    /// Show confirmation dialog when leaving table
+    /**
+     * Set up message hooks for server communication
+     */
+    private void setupMessageHooks() {
+        // PlayerReady response
+        BlackjackGame.client.addMessageHook(Message.PlayerReady.Response.class, (response) -> {
+            if (response.getStatus() && response.getPlayerName().equals(playerName)) {
+                // Show confirmation message
+                SwingUtilities.invokeLater(() -> {
+                    JOptionPane.showMessageDialog(this,
+                            "You are ready. Waiting for dealer to shuffle.",
+                            "Ready", JOptionPane.INFORMATION_MESSAGE);
+                });
+            } else if (!response.getStatus()) {
+                // Error case - undo ready status and re-enable button
+                if (currentPlayerPosition != null) {
+                    currentPlayerPosition.setReady(false);
+                    currentPlayerPosition.repaint();
+                }
+
+                // Re-enable Ready button
+                SwingUtilities.invokeLater(() -> {
+                    readyButton.setEnabled(true);
+                    JOptionPane.showMessageDialog(this,
+                            "Failed to set ready status. Please try again.",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                });
+            }
+        });
+
+        // ShuffleComplete notification
+        BlackjackGame.client.addMessageHook(Message.ShuffleComplete.Response.class, (response) -> {
+            if (response.getTableId() == tableId) {
+                // Show bet dialog when dealer has shuffled
+                SwingUtilities.invokeLater(() -> {
+                    System.out.println("Showing bet dialog after shuffle complete");
+                    showBetDialog();
+                });
+            }
+        });
+
+        // PlaceBet response
+        BlackjackGame.client.addMessageHook(Message.PlaceBet.Response.class, (response) -> {
+            if (response.getStatus()) {
+                System.out.println("Bet placed successfully");
+                // Waiting for cards to be dealt
+            } else {
+                System.out.println("Failed to place bet");
+                // Return the bet amount to the player's funds
+                chipCount += currentBet;
+                currentBet = 0;
+
+                // Update UI
+                chipsLabel.setText("Your Funds: $" + chipCount);
+                betLabel.setText("Bet: $" + currentBet);
+
+                // Show error message
+                SwingUtilities.invokeLater(() -> {
+                    JOptionPane.showMessageDialog(this,
+                            "Failed to place bet. Please try again.",
+                            "Bet Error", JOptionPane.ERROR_MESSAGE);
+
+                    // Show bet dialog again
+                    showBetDialog();
+                });
+            }
+        });
+
+        // Handle GameState.Update messages
+        // In PlayerTableBlackJack.java - modify the GameState.Update handler
+        BlackjackGame.client.addMessageHook(Message.GameState.Update.class, (update) -> {
+            System.out.println("GameState update received - dealer turn: " + update.isDealerTurn() +
+                    ", player turn: " + update.isPlayerTurn() +
+                    ", round complete: " + update.isRoundComplete());
+
+            safeUIUpdate(() -> {
+                // Update player's turn status
+                isPlayerTurn = update.isPlayerTurn();
+
+                // Track whose turn it is and update UI accordingly
+                if (update.isDealerTurn()) {
+                    // It's dealer's turn - player cannot act
+                    hitButton.setEnabled(false);
+                    standButton.setEnabled(false);
+                    doubleDownButton.setEnabled(false);
+                } else if (update.isPlayerTurn()) {
+                    // It's player's turn - enable appropriate buttons
+                    // Only enable if not busted and not blackjack
+                    hitButton.setEnabled(!hasBlackjack && !hasBusted);
+                    standButton.setEnabled(!hasBlackjack && !hasBusted);
+                    doubleDownButton.setEnabled(!hasBlackjack && !hasBusted &&
+                            myCardsPanel.getComponentCount() == 2 &&
+                            chipCount >= currentBet);
+                }
+
+                // Handle any message that came with the update
+                if (update.getResultMessage() != null) {
+                    JOptionPane.showMessageDialog(PlayerTableBlackJack.this,
+                            update.getResultMessage(),
+                            "Game Update", JOptionPane.INFORMATION_MESSAGE);
+                }
+
+                // Handle round completion separately from the ready button
+                if (update.isRoundComplete()) {
+                    roundComplete = true;
+                    resetForNextRound();
+                }
+
+                // Important: Do NOT modify readyButton here
+            });
+        });
+        // DealInitialCards response
+        BlackjackGame.client.addMessageHook(Message.DealInitialCards.Response.class, (response) -> {
+            System.out.println("Received DealInitialCards.Response with status: " + response.getStatus() +
+                    " for player: " + response.getPlayerName());
+
+            if (response.getStatus() && response.getPlayerName().equals(playerName)) {
+                System.out.println("Processing cards for player: " + playerName);
+
+                safeUIUpdate(() -> {
+                    try {
+                        // Display dealer cards
+                        dealerCardsPanel.removeAll();
+                        Card[] dealerCards = response.getDealerCards();
+                        System.out.println("Dealer cards count: " + (dealerCards != null ? dealerCards.length : "null"));
+
+                        if (dealerCards != null) {
+                            // Process each dealer card - respecting their face up/down state
+                            for (Card dealerCard : dealerCards) {
+                                String cardValue = dealerCard.getValue().toString();
+                                String suitSymbol = getSuitSymbol(dealerCard.getSuit());
+                                System.out.println("Adding dealer card: " + cardValue + suitSymbol);
+
+                                // Create card panel
+                                CardPanel dealerCardPanel = new CardPanel(cardValue, suitSymbol);
+
+                                // Set face up/down state according to the card's state
+                                if (!dealerCard.isFaceUp()) {
+                                    dealerCardPanel.setFaceDown(true);
+                                }
+
+                                dealerCardsPanel.add(dealerCardPanel);
+                            }
+                        }
+
+                        // Display player cards - all face up for the player
+                        myCardsPanel.removeAll();
+                        Card[] playerCards = response.getPlayerCards();
+                        System.out.println("Player cards count: " + (playerCards != null ? playerCards.length : "null"));
+
+                        if (playerCards != null) {
+                            // Process each player card
+                            for (Card playerCard : playerCards) {
+                                String cardValue = playerCard.getValue().toString();
+                                String suitSymbol = getSuitSymbol(playerCard.getSuit());
+                                System.out.println("Adding player card: " + cardValue + suitSymbol);
+
+                                // Create card panel - player sees all their cards face up
+                                CardPanel playerCardPanel = new CardPanel(cardValue, suitSymbol);
+                                playerCardPanel.setFaceUp(true);
+
+                                myCardsPanel.add(playerCardPanel);
+                            }
+                        }
+
+                        // Refresh display
+                        dealerCardsPanel.revalidate();
+                        dealerCardsPanel.repaint();
+                        myCardsPanel.revalidate();
+                        myCardsPanel.repaint();
+                        revalidate();
+                        repaint();
+
+                        // Calculate hand value
+                        int handValue = calculateHandValue(myCardsPanel);
+
+                        // Check for blackjack
+                        if (handValue == 21 && myCardsPanel.getComponentCount() == 2) {
+                            hasBlackjack = true;
+                            JOptionPane.showMessageDialog(this,
+                                    "Blackjack! Waiting for dealer...",
+                                    "Blackjack", JOptionPane.INFORMATION_MESSAGE);
+
+                            // Disable gameplay buttons
+                            hitButton.setEnabled(false);
+                            standButton.setEnabled(false);
+                            doubleDownButton.setEnabled(false);
+                        } else {
+                            // Enable gameplay buttons
+                            isPlayerTurn = true;
+                            hitButton.setEnabled(true);
+                            standButton.setEnabled(true);
+                            doubleDownButton.setEnabled(chipCount >= currentBet);
+                        }
+
+                        // Disable ready button during gameplay
+                        readyButton.setEnabled(false);
+                    } catch (Exception e) {
+                        System.err.println("Error updating UI: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                });
+            }
+        });
+
+        // Hit response
+        BlackjackGame.client.addMessageHook(Message.Hit.Response.class, (response) -> {
+            Card drawnCard = response.getDraw();
+            boolean isDealerCard = response.isDealerCard();
+
+            if (drawnCard != null) {
+                safeUIUpdate(() -> {
+                    // [existing code to display card]
+
+                    // At the end of handling player's hit, if not busted, enable action buttons
+                    if (!isDealerCard) {
+                        // Calculate new hand value
+                        int handValue = calculateHandValue(myCardsPanel);
+
+                        // Check for bust
+                        if (handValue > 21) {
+                            hasBusted = true;
+                            isPlayerTurn = false;
+
+                            JOptionPane.showMessageDialog(this,
+                                    "Bust! Your hand value: " + handValue,
+                                    "Busted", JOptionPane.INFORMATION_MESSAGE);
+
+                            // Disable gameplay buttons
+                            hitButton.setEnabled(false);
+                            standButton.setEnabled(false);
+                            doubleDownButton.setEnabled(false);
+
+                            // Player busted, turn goes to dealer automatically
+                            Message.GameState.Update dealerTurnMsg =
+                                    new Message.GameState.Update(true, false, false,
+                                            "Player " + playerName + " busted. Dealer's turn.");
+                            BlackjackGame.client.sendNetworkMessage(dealerTurnMsg);
+                        } else {
+                            // Player didn't bust, re-enable action buttons
+                            isPlayerTurn = true;
+                            hitButton.setEnabled(true);
+                            standButton.setEnabled(true);
+                            doubleDownButton.setEnabled(false); // Can't double down after hitting
+                        }
+                    }
+                });
+            }
+        });
+
+        // Stand response
+        BlackjackGame.client.addMessageHook(Message.Stand.Response.class, (response) -> {
+            boolean playerWins = response.playerWins();
+
+            // Wait for GameResult message for final outcome
+        });
+
+        // DoubleDown response
+        BlackjackGame.client.addMessageHook(Message.DoubleDown.Response.class, (response) -> {
+            boolean status = response.getStatus();
+            Card drawnCard = response.getDrawnCard();
+
+            if (status && drawnCard != null) {
+                // Add the drawn card to player's hand
+                safeUIUpdate(() -> {
+                    String cardValue = drawnCard.getValue().toString();
+                    String suitSymbol = getSuitSymbol(drawnCard.getSuit());
+                    CardPanel cardPanel = new CardPanel(cardValue, suitSymbol);
+                    cardPanel.setFaceUp(true);
+                    myCardsPanel.add(cardPanel);
+                    myCardsPanel.revalidate();
+                    myCardsPanel.repaint();
+
+                    // Calculate hand value
+                    int handValue = calculateHandValue(myCardsPanel);
+
+                    // Check for bust
+                    if (handValue > 21) {
+                        hasBusted = true;
+                        JOptionPane.showMessageDialog(this,
+                                "Bust! Your hand value: " + handValue,
+                                "Busted", JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(this,
+                                "You doubled down. Your hand value: " + handValue,
+                                "Double Down", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                });
+            } else if (!status) {
+                // Double down failed
+                JOptionPane.showMessageDialog(this,
+                        "Failed to double down.",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+
+                // Return the additional bet
+                chipCount += currentBet / 2;
+                currentBet /= 2;
+
+                // Update UI
+                chipsLabel.setText("Your Funds: $" + chipCount);
+                betLabel.setText("Bet: $" + currentBet);
+
+                // Re-enable gameplay buttons
+                hitButton.setEnabled(true);
+                standButton.setEnabled(true);
+                doubleDownButton.setEnabled(chipCount >= currentBet);
+            }
+        });
+
+        // GameResult response
+        BlackjackGame.client.addMessageHook(Message.GameResult.Response.class, (response) -> {
+            if (response.getPlayerName().equals(playerName)) {
+                boolean playerWins = response.playerWins();
+                boolean isPush = response.isPush();
+                String resultMessage = response.getResultMessage();
+                int winnings = response.getWinnings();
+                int playerHandValue = response.getPlayerHandValue();
+                int dealerHandValue = response.getDealerHandValue();
+
+                // Update player's chip count
+                if (playerWins || isPush) {
+                    chipCount += winnings;
+                }
+
+                // Reset bet amount
+                currentBet = 0;
+
+                // Update UI
+                safeUIUpdate(() -> {
+                    chipsLabel.setText("Your Funds: $" + chipCount);
+                    betLabel.setText("Bet: $" + currentBet);
+
+                    // Show result message
+                    JOptionPane.showMessageDialog(this,
+                            resultMessage,
+                            playerWins ? "You Win!" : (isPush ? "Push" : "Dealer Wins"),
+                            JOptionPane.INFORMATION_MESSAGE);
+
+                    // Reveal dealer's face-down card if any
+                    for (Component component : dealerCardsPanel.getComponents()) {
+                        if (component instanceof CardPanel) {
+                            CardPanel cardPanel = (CardPanel) component;
+                            cardPanel.setFaceDown(false);
+                        }
+                    }
+                    dealerCardsPanel.revalidate();
+                    dealerCardsPanel.repaint();
+
+                    // Reset game state for next round
+                    resetForNextRound();
+                });
+            }
+        });
+
+        // DealerReveal response
+        BlackjackGame.client.addMessageHook(Message.DealerReveal.Response.class, (response) -> {
+            safeUIUpdate(() -> {
+                // Reveal dealer's face-down card
+                dealerCardsPanel.removeAll();
+
+                Card[] dealerCards = response.getDealerCards();
+                for (Card card : dealerCards) {
+                    CardPanel cardPanel = new CardPanel(
+                            card.getValue().toString(),
+                            getSuitSymbol(card.getSuit()));
+                    cardPanel.setFaceUp(true); // All cards face up
+                    dealerCardsPanel.add(cardPanel);
+                }
+
+                dealerCardsPanel.revalidate();
+                dealerCardsPanel.repaint();
+            });
+        });
+
+        // Add this to the setupMessageHooks() method in PlayerTableBlackJack.java
+    }
+
+    /**
+     * Reset game state for next round
+     */
+    private void resetForNextRound() {
+        // Reset game state variables
+        isPlayerTurn = false;
+        hasBlackjack = false;
+        hasBusted = false;
+        roundComplete = false;
+
+        // Clear cards
+        myCardsPanel.removeAll();
+        dealerCardsPanel.removeAll();
+        myCardsPanel.revalidate();
+        myCardsPanel.repaint();
+        dealerCardsPanel.revalidate();
+        dealerCardsPanel.repaint();
+
+        // Reset ready status
+        if (currentPlayerPosition != null) {
+            currentPlayerPosition.setReady(false);
+            currentPlayerPosition.repaint();
+        }
+
+        // Enable ready button for next round
+        readyButton.setEnabled(true);
+
+        // Disable gameplay buttons
+        hitButton.setEnabled(false);
+        standButton.setEnabled(false);
+        doubleDownButton.setEnabled(false);
+    }
+
+    /**
+     * Show confirmation dialog when leaving table
+     */
     private void showLeaveConfirmation() {
-        // Create a custom styled dialog for leave confirmation
         JDialog confirmDialog = new JDialog(this, "Confirm Leave", true);
         confirmDialog.setSize(400, 200);
         confirmDialog.setLocationRelativeTo(this);
@@ -423,9 +929,139 @@ public class PlayerTableBlackJack extends JFrame {
         noButton.addActionListener(e -> confirmDialog.dispose());
         yesButton.addActionListener(e -> {
             confirmDialog.dispose();
+
+            // Send PlayerLeave message to server
+            Message.PlayerLeave.Request request = new Message.PlayerLeave.Request(
+                    playerPosition, tableId);
+            BlackjackGame.client.sendNetworkMessage(request);
+
             dispose(); // Close the table window
         });
 
         confirmDialog.setVisible(true);
+    }
+
+    /**
+     * Show betting dialog
+     */
+    private void showBetDialog() {
+        JDialog betDialog = new JDialog(this, "Place Your Bet", true);
+        betDialog.setSize(300, 200);
+        betDialog.setLocationRelativeTo(this);
+
+        // Create panel for bet dialog
+        JPanel betPanel = new JPanel(new BorderLayout(10, 10));
+        betPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+
+        // Available funds label
+        JLabel fundsLabel = new JLabel("Available Funds: $" + chipCount);
+        fundsLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        fundsLabel.setFont(new Font("Arial", Font.BOLD, 14));
+
+        // Bet amount spinner
+        JPanel spinnerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JLabel betAmountLabel = new JLabel("Bet Amount: $");
+        JSpinner betSpinner = new JSpinner(new SpinnerNumberModel(10, 5, chipCount, 5));
+        betSpinner.setPreferredSize(new Dimension(80, 25));
+        spinnerPanel.add(betAmountLabel);
+        spinnerPanel.add(betSpinner);
+
+        // Place bet button
+        JButton placeBetButton = UIFactory.createStyledButton("Place Bet",
+                new Color(40, 167, 69), Color.WHITE);
+
+        // Arrange components
+        betPanel.add(fundsLabel, BorderLayout.NORTH);
+        betPanel.add(spinnerPanel, BorderLayout.CENTER);
+        betPanel.add(placeBetButton, BorderLayout.SOUTH);
+
+        betDialog.add(betPanel);
+
+        // Place bet action
+        placeBetButton.addActionListener(e -> {
+            currentBet = (Integer) betSpinner.getValue();
+            chipCount -= currentBet;
+
+            // Update UI
+            betLabel.setText("Bet: $" + currentBet);
+            chipsLabel.setText("Your Funds: $" + chipCount);
+
+            // Send bet information to server
+            Message.PlaceBet.Request betRequest = new Message.PlaceBet.Request(
+                    playerName, tableId, currentBet);
+            BlackjackGame.client.sendNetworkMessage(betRequest);
+
+            betDialog.dispose();
+        });
+
+        betDialog.setVisible(true);
+    }
+
+    /**
+     * Calculate hand value
+     */
+    private int calculateHandValue(JPanel cardsPanel) {
+        int total = 0;
+        int aceCount = 0;
+
+        // Count all cards in the panel
+        for (Component component : cardsPanel.getComponents()) {
+            if (component instanceof CardPanel) {
+                CardPanel cardPanel = (CardPanel) component;
+                String value = cardPanel.getValue();
+
+                // Handle face cards (J, Q, K)
+                if (value.equals("J") || value.equals("Q") || value.equals("K")) {
+                    total += 10;
+                }
+                // Handle Ace - count as 1 initially, adjust later
+                else if (value.equals("A")) {
+                    total += 1;
+                    aceCount++;
+                }
+                // Handle number cards
+                else {
+                    try {
+                        total += Integer.parseInt(value);
+                    } catch (NumberFormatException e) {
+                        // If parsing fails, default to 10
+                        total += 10;
+                    }
+                }
+            }
+        }
+
+        // Adjust for aces - can be 1 or 11
+        for (int i = 0; i < aceCount; i++) {
+            // If we can add 10 more without busting, do it (makes the Ace an 11)
+            if (total + 10 <= 21) {
+                total += 10;
+            }
+        }
+
+        return total;
+    }
+
+    /**
+     * Get suit symbol from Suit enum
+     */
+    private String getSuitSymbol(Suit suit) {
+        return switch (suit) {
+            case HEARTS -> "♥";
+            case DIAMONDS -> "♦";
+            case CLUBS -> "♣";
+            case SPADES -> "♠";
+        };
+    }
+
+    /**
+     * Thread-safe UI updates
+     */
+    private void safeUIUpdate(Runnable updateTask) {
+        if (SwingUtilities.isEventDispatchThread()) {
+            updateTask.run();
+        } else {
+            SwingUtilities.invokeLater(updateTask);
+        }
     }
 }

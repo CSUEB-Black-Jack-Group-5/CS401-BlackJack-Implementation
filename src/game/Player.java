@@ -4,12 +4,13 @@ import java.io.Serializable;
 
 public class Player implements Serializable {
     private static int idCount = 0;
-    private int playerId;
+    public int playerId;
     private boolean isReady;
     private CardHand hand;
     private CardHand splitHand;
     private CardHand activeHandRef;
     private int wager;
+    private int bet; // Added missing field for bet amount
     private Wallet wallet;
     private String username; // Username format: "basims21"
     private String userId;   // UserId format: "u001"
@@ -25,6 +26,7 @@ public class Player implements Serializable {
         this.splitHand = null;
         this.activeHandRef = hand;
         this.wager = 0;
+        this.bet = 0; // Initialize bet field
         this.wallet = new Wallet();
         this.wins = 0;
         this.losses = 0;
@@ -38,14 +40,32 @@ public class Player implements Serializable {
         return isReady;
     }
 
-    public void makeBet(float amount) {
-        this.wager = (int) amount;
-        wallet.removeFunds(-amount);
+//    public void makeBet(float amount) {
+//        this.wager = (int) amount;
+//        wallet.removeFunds(-amount);
+//    }
+
+    /**
+     * Sets the bet amount for the player
+     * @param amount The bet amount in currency units
+     */
+    public void setBet(int amount) {
+        this.bet = amount;
+        this.wager = amount; // Keep wager in sync with bet for backward compatibility
+    }
+
+    /**
+     * Gets the current bet amount
+     * @return The current bet amount
+     */
+    public int getBet() {
+        return this.bet;
     }
 
     public void doubleDown(Card card) {
         wallet.removeFunds(-wager);
         wager *= 2;
+        bet *= 2; // Keep bet field in sync
         hit(card); // Player automatically draws one card
     }
 
@@ -118,6 +138,7 @@ public class Player implements Serializable {
         this.activeHandRef = hand;
         this.isReady = false;
         this.wager = 0;
+        this.bet = 0; // Reset bet as well
     }
 
     /**
@@ -127,6 +148,7 @@ public class Player implements Serializable {
         int refund = wager / 2;
         wallet.addFunds(refund);
         wager = 0;
+        bet = 0; // Reset bet as well
     }
 
     /**
@@ -142,6 +164,38 @@ public class Player implements Serializable {
      */
     public boolean bustCheck() {
         return activeHandRef.bustCheck();
+    }
+
+    /**
+     * Gets the split hand if one exists
+     * @return The split hand, or null if there's no split
+     */
+    public CardHand getSplitHand() {
+        return splitHand;
+    }
+
+    /**
+     * Sets the split hand
+     * @param splitHand The new split hand
+     */
+    public void setSplitHand(CardHand splitHand) {
+        this.splitHand = splitHand;
+    }
+
+    /**
+     * Sets the second bet amount for a split hand
+     * @param amount The bet amount for the second hand
+     */
+    public void setSecondBet(int amount) {
+        // This would typically be used when splitting
+    }
+
+    /**
+     * Checks if the player has split their hand
+     * @return true if split, false otherwise
+     */
+    public boolean hasSplit() {
+        return splitHand != null;
     }
 
     public CardHand getHand() {
@@ -166,4 +220,3 @@ public class Player implements Serializable {
         losses++;
     }
 }
-

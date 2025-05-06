@@ -15,7 +15,10 @@ public class CardPanel extends JPanel {
     private static final Color CARD_BORDER = Color.BLACK;
     private static final Color CARD_BACK_COLOR = new Color(30, 100, 200);
 
-    /// Create a new card panel
+    public CardPanel() {
+        this("", "", false);
+    }
+
     public CardPanel(String value, String suit, boolean faceUp) {
         this.value = value;
         this.suit = suit;
@@ -25,41 +28,37 @@ public class CardPanel extends JPanel {
         setOpaque(false);
     }
 
-    /// Create a new face-up card panel
     public CardPanel(String value, String suit) {
         this(value, suit, true);
     }
 
-    /// Get the card value
     public String getValue() {
         return value;
     }
 
-    /// Get the card suit
     public String getSuit() {
         return suit;
     }
 
-    /// Check if the card is face up
     public boolean isFaceUp() {
         return faceUp;
     }
 
-    /// Set whether the card is face up
     public void setFaceUp(boolean faceUp) {
         this.faceUp = faceUp;
         repaint();
     }
 
-    /// Flip the card
+    public void setFaceDown(boolean faceDown) {
+        this.faceUp = !faceDown;
+        repaint();
+    }
     public void flip() {
         this.faceUp = !this.faceUp;
         repaint();
     }
 
-    /// Get the color of the card suit
     private Color getSuitColor() {
-        ///  I draw the UI card for like this
         /// Red for hearts and diamonds, black for clubs and spades
         return (suit.equals("♥") || suit.equals("♦")) ? Color.RED : Color.BLACK;
     }

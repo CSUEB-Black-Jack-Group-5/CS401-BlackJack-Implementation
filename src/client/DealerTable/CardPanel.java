@@ -1,19 +1,25 @@
 package client.DealerTable;
 
-// File 4: CardPanel.java
 import javax.swing.*;
 import java.awt.*;
 
 /// Card panel to display playing cards
-
 public class CardPanel extends JPanel {
     private String value;
-
-    ///  maybe doing in gamelogic
     private String suit;
     private boolean isFaceUp = true;
 
-    ///  Playing card panel
+    /**
+     * Default constructor for face-down card
+     */
+    public CardPanel() {
+        this("", "");
+        this.isFaceUp = false;
+    }
+
+    /**
+     * Constructor for a playing card
+     */
     public CardPanel(String value, String suit) {
         this.value = value;
         this.suit = suit;
@@ -21,27 +27,50 @@ public class CardPanel extends JPanel {
         setPreferredSize(new Dimension(50, 70));
     }
 
-    /// Flips the card over
+    /**
+     * Flips the card over
+     */
     public void flip() {
         isFaceUp = !isFaceUp;
         repaint();
     }
 
-    /// / Card value in GUI
+    /**
+     * Sets whether the card is face up
+     */
+    public void setFaceUp(boolean faceUp) {
+        this.isFaceUp = faceUp;
+        repaint();
+    }
 
+    /**
+     * Sets whether the card is face down
+     */
+    public void setFaceDown(boolean faceDown) {
+        this.isFaceUp = !faceDown;
+        repaint();
+    }
+
+    /**
+     * Gets the card value
+     */
     public String getValue() {
         return value;
     }
 
-    /// Card suit maybe doing in server
+    /**
+     * Gets the card suit
+     */
     public String getSuit() {
         return suit;
     }
 
-    /// Check face up card
-//    public boolean isFaceUp() {
-//        return isFaceUp;
-//    }
+    /**
+     * Checks if card is face up
+     */
+    public boolean isFaceUp() {
+        return isFaceUp;
+    }
 
     @Override
     protected void paintComponent(Graphics g) {

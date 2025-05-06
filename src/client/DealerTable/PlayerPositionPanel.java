@@ -9,10 +9,13 @@ import java.awt.*;
 public class PlayerPositionPanel extends JPanel {
     private boolean occupied;
     private String positionLabel;
+    private String playerName;
+    private boolean ready = false;
 
     public PlayerPositionPanel(boolean occupied, String positionLabel) {
         this.occupied = occupied;
         this.positionLabel = positionLabel;
+        this.playerName = playerName;
         setOpaque(false);
         setPreferredSize(new Dimension(80, 80));
     }
@@ -81,6 +84,20 @@ public class PlayerPositionPanel extends JPanel {
             textY = height - 10;
             g2d.drawString(text, textX, textY);
         }
+        if (ready) {
+            // Draw a green halo around the player position
+            g2d.setColor(new Color(0, 255, 0, 150)); // Green halo
+            g2d.setStroke(new BasicStroke(3f));
+            g2d.drawOval(2, 2, width - 4, height - 4);
+
+            // Draw "READY" text below the position
+            g2d.setColor(Color.GREEN);
+            g2d.setFont(new Font("Arial", Font.BOLD, 10));
+            String readyText = "READY";
+            FontMetrics fm = g2d.getFontMetrics();
+            int textWidth = fm.stringWidth(readyText);
+            g2d.drawString(readyText, (width - textWidth) / 2, height + 15);
+        }
     }
 
     ///  Occupy
@@ -97,5 +114,12 @@ public class PlayerPositionPanel extends JPanel {
     /// position label
     public String getPositionLabel() {
         return positionLabel;
+    }
+    public String getPlayerName() {
+        return playerName;
+    }
+    public void setReady(boolean ready) {
+        this.ready = ready;
+        repaint();
     }
 }

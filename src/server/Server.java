@@ -1,6 +1,8 @@
 package server;
 
+import game.Dealer;
 import game.Player;
+import game.Table;
 import networking.AccountType;
 import networking.Message;
 
@@ -104,8 +106,8 @@ public class Server {
                         // TODO: AccountType accountType = serverRef.db.getUserTypeFor(username);
 //                        AccountType accountType = AccountType.PLAYER;
                         ClientThreadWithHooks clientThread = switch (accountType) {
-                            case AccountType.PLAYER -> new PlayerClientThread(socket, serverRef, writer, reader);
-                            case AccountType.DEALER -> new DealerClientThread(socket, serverRef, writer, reader);
+                            case PLAYER -> new PlayerClientThread(socket, serverRef, writer, reader);
+                            case DEALER -> new DealerClientThread(socket, serverRef, writer, reader);
                         };
                         writer.writeObject(new Message.Login.Response(true, accountType));
 
@@ -232,4 +234,59 @@ public class Server {
             client.sendNetworkMessage(message);
         }
     }
+
+    public void notifyDealerOfPlayerReady(int tableId, String playerName) {
+        // Find the table thread
+        for (TableThread tableThread : tables) {
+            if (tableThread != null && tableThread.getTable().getTableId() == tableId) {
+                // Find the dealer in this table and notify them
+                for (int i = 0; i < tableThread.joinedUsersCount; i++) {
+                    if (tableThread.joinedUsers[i] instanceof DealerClientThread) {
+                        tableThread.joinedUsers[i].sendNetworkMessage(
+                                new Message.PlayerReady.Response(true, playerName));
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+    }
+
+    // Add this method to your Server.java class
+    // Make sure this method in Server.java is fully implemented:
+
+    public void notifyDealerToDealInitialCards(int tableId, String playerName, int betAmount) {
+        System.out.println("Server attempting to notify dealer to deal cards for table " + tableId +
+                ", player " + playerName + ", bet " + betAmount);
+
+        boolean foundTable = false;
+        boolean foundDealer = false;
+        // Find the table thread
+        for (TableThread tableThread : tables) {
+            if (tableThread != null && tableThread.getTable().getTableId() == tableId) {
+                // Find the dealer in this table and notify them
+                for (int i = 0; i < tableThread.joinedUsersCount; i++) {
+                    if (tableThread.joinedUsers[i] instanceof DealerClientThread) {
+                        // Notify dealer to deal initial cards
+                        Message.DealInitialCards.Request request =
+                                new Message.DealInitialCards.Request(tableId, playerName, betAmount);
+                        tableThread.joinedUsers[i].sendNetworkMessage(request);
+
+                        System.out.println("Deal request sent to dealer");
+                        return;
+                    }
+                }
+                System.out.println("ERROR: No dealer found for table " + tableId);
+                return;
+            }
+        }
+
+        if (!foundTable) {
+            System.out.println("SERVER ERROR: Could not find table with ID " + tableId);
+        } else if (!foundDealer) {
+            System.out.println("SERVER ERROR: Found table " + tableId + " but no dealer thread");
+        }
+    }
+
+
 }

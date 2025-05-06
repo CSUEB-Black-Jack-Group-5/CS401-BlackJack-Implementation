@@ -7,6 +7,8 @@ import java.awt.*;
 public class PlayerPositionPanel extends JPanel {
     private boolean occupied;
     private String positionLabel;
+    private String playerName;
+    private boolean ready = false;
     private static final Color POSITION_BACKGROUND = new Color(0, 0, 0, 150);
     private static final Color OCCUPIED_BORDER = new Color(0, 255, 0, 200); // Green for occupied
     private static final Color VACANT_BORDER = new Color(200, 200, 200, 150); // Gray for vacant
@@ -17,6 +19,7 @@ public class PlayerPositionPanel extends JPanel {
     /// @param positionLabel the label for the position
     public PlayerPositionPanel(boolean occupied, String positionLabel) {
         this.occupied = occupied;
+        this.playerName = playerName;
         this.positionLabel = positionLabel;
         setPreferredSize(new Dimension(80, 80));
         setOpaque(false);
@@ -41,6 +44,15 @@ public class PlayerPositionPanel extends JPanel {
     /// Set the position label
     public void setPositionLabel(String label) {
         this.positionLabel = label;
+        repaint();
+    }
+
+    public String getPlayerName() {
+        return playerName;
+    }
+
+    public void setReady(boolean ready) {
+        this.ready = ready;
         repaint();
     }
 
@@ -69,5 +81,19 @@ public class PlayerPositionPanel extends JPanel {
                 (getHeight() + textHeight / 2) / 2);
 
         g2d.dispose();
+        if (ready) {
+            g2d = (Graphics2D) g;
+            g2d.setColor(new Color(0, 255, 0, 150)); // Green halo for ready status
+            g2d.setStroke(new BasicStroke(3f));
+            g2d.drawOval(2, 2, getWidth() - 4, getHeight() - 4);
+
+            // Draw "READY" text below
+            g2d.setColor(Color.GREEN);
+            g2d.setFont(new Font("Arial", Font.BOLD, 10));
+            String readyText = "READY";
+            FontMetrics fm = g2d.getFontMetrics();
+            textWidth = fm.stringWidth(readyText);
+            g2d.drawString(readyText, (getWidth() - textWidth) / 2, getHeight() + 15);
+        }
     }
 }

@@ -32,14 +32,25 @@ public class Dealer implements Serializable {
         return hand.getCard(index);
     }
 
-    public void dealCard(Player player) {
+    public Card dealCard(Player player) {
         Card card = shoe.dealCard();
         player.getHand().addCard(card);
+        return card;
     }
 
     public void hitSelf() {
         Card card = shoe.dealCard();
         hand.addCard(card);
+    }
+
+    public Card dealCardToSelf() {
+        Card card = this.shoe.dealCard();
+        this.hand.addCard(card);
+        return card;
+    }
+
+    public int getTotalCards() {
+        return this.shoe.getNumCards();
     }
 
     public void resetHand() {
