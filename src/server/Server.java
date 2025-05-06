@@ -9,9 +9,9 @@ import networking.Message;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.Hashtable;
 
 import dbHelper.CSVDatabaseHelper;
@@ -162,6 +162,23 @@ public class Server {
     public void startServer() {
         connectionThread = new Thread(this::connectionHandler);
         connectionThread.start();
+
+        try {
+            Enumeration e = NetworkInterface.getNetworkInterfaces();
+            while (e.hasMoreElements()) {
+                NetworkInterface n = (NetworkInterface) e.nextElement();
+                Enumeration ee = n.getInetAddresses();
+                while (ee.hasMoreElements()) {
+                    InetAddress i = (InetAddress) ee.nextElement();
+                    if (i instanceof Inet4Address) {
+                        System.out.println("IP: " + i.getHostAddress());
+                        System.out.println("Port: " + this.port);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println(e.getLocalizedMessage());
+        }
     }
     public void stopServer() {
         if (!running) return;
