@@ -1,10 +1,8 @@
 package networking;
 
 import java.io.Serializable;
-import game.Card;
-import game.CardHand;
-import game.Shoe;
-import game.Table;
+
+import game.*;
 
 public class Message implements Serializable {
     /* Login Method */
@@ -101,15 +99,23 @@ public class Message implements Serializable {
 
         public static class Response extends Message {
             private boolean status;
+            private String playerUsername;
             private Table table;
+            private int playerCount;
 
-            public Response(boolean status, Table table) {
+            public Response(boolean status, String playerUsername, Table table, int playerCount) {
                 this.status = status;
+                this.playerUsername = playerUsername;
                 this.table = table;
+                this.playerCount = playerCount;
             }
 
             public boolean getStatus() {
                 return status;
+            }
+
+            public String getPlayerUsername() {
+                return playerUsername;
             }
 
             public Table getTable() {
@@ -125,7 +131,7 @@ public class Message implements Serializable {
             }
 
             public int getPlayerCount() {
-                return table.getPlayerCount();
+                return playerCount;     //table.getPlayerCount();
             }
 
             public int getPlayerLimit() {
@@ -137,15 +143,10 @@ public class Message implements Serializable {
     /* Create Table Method */
     public static class CreateTable {
         public static class Request extends Message {
-            private String dealerId;    // how come dealerId is a string but tableId is an int according to UML?
 
-            public Request(String dealerId) {
-                this.dealerId = dealerId;
+            public Request() {
             }
 
-            public String getDealerId() {
-                return dealerId;
-            }
         }
 
         public static class Response extends Message {
@@ -376,16 +377,16 @@ public class Message implements Serializable {
     /* Lobby Data Method */
     public static class LobbyData {
         public static class Request extends Message {
-            private int dealerId;       // added dealerId for getDealerId method in UML
+            private int userId;       // added dealerId for getDealerId method in UML
             private AccountType type;
 
-            public Request(int dealerId, AccountType type) {
-                this.dealerId = dealerId;
+            public Request(int userId, AccountType type) {
+                this.userId = userId;
                 this.type = type;
             }
 
-            public int getDealerId() {
-                return dealerId;
+            public int getUserId() {
+                return userId;
             }
 
             public AccountType getType() {  // added getType method
@@ -421,34 +422,34 @@ public class Message implements Serializable {
     /* Table Data Method */     // not properly UMLed yet; this is my attempt at implementation
     public static class TableData {
         public static class Request extends Message {
-            private int dealerId;       // unsure who's requesting the table data?
+            private int tableId;       // unsure who's requesting the table data?
 
-            public Request(int dealerId) {
-                this.dealerId = dealerId;
+            public Request(int tableId) {
+                this.tableId = tableId;
             }
 
-            public int getDealerId() {
-                return dealerId;
+            public int getTableId() {
+                return tableId;
             }
         }
 
         public static class Response extends Message {
-            private int dealerId;
-            private int[] playerIds;
+            private Player[] players;
+            private Dealer dealer;
             private int playersJoined;
 
-            public Response(int dealerId, int[] playerIds, int playersJoined) {
-                this.dealerId = dealerId;
-                this.playerIds = playerIds;
+            public Response(Player[] players, Dealer dealer, int playersJoined) {
+                this.players = players;
+                this.dealer = dealer;
                 this.playersJoined = playersJoined;
             }
 
-            public int getDealerId() {
-                return dealerId;
+            public Player[] getPlayers() {
+                return players;
             }
 
-            public int[] getPlayerIds() {
-                return playerIds;
+            public Dealer getDealer() {
+                return dealer;
             }
 
             public int getPlayersJoined() {

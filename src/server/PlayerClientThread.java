@@ -9,14 +9,12 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 public class PlayerClientThread extends ClientThreadWithHooks {
-    private final Dealer dealer;
     private Player player;
 
-    public PlayerClientThread(Socket socket, Server server, ObjectOutputStream writer, ObjectInputStream reader) {
+    public PlayerClientThread(Socket socket, Server server, ObjectOutputStream writer, ObjectInputStream reader, String username) {
         super(socket, writer, reader);
 
-        this.player = new Player("wahooman1","01");
-        this.dealer = new Dealer("dealer1", "letmein", 17);  // Temporary dealer login
+        this.player = new Player(username,"01");
 
         System.out.println("Spawned player thread: " + socket.getInetAddress());
 
@@ -26,7 +24,10 @@ public class PlayerClientThread extends ClientThreadWithHooks {
         addMessageHook(Message.JoinTable.Request.class, (req) -> {
             System.out.println("JoinTable Request");
             boolean status = server.movePlayerClientToTable(this, req.getTableId(), player);
-            sendNetworkMessage(new Message.JoinTable.Response(status, server.getTables()[req.getTableId()].getTable()));
+            Table table = server.getTableById(req.getTableId());
+            // System.out.println(server.getTableById(req.getTableId()).toString());
+            // System.out.println("Player Count: " + server.getTableById(req.getTableId()).getPlayerCount());
+            sendNetworkMessage(new Message.JoinTable.Response(status, player.getUsername(), table, table.getPlayerCount()));
         });
         addMessageHook(Message.Hit.Request.class, (req) -> {
             System.out.println("Hit Request");
@@ -83,30 +84,17 @@ public class PlayerClientThread extends ClientThreadWithHooks {
             // Message.LobbyData.Response response = new Message.LobbyData.Response(tables, dealers.length, players.length);
 
             // Fetch all table threads from the server
-            TableThread[] tableThreads = server.getTables();
-            Table[] tables;
-
-            if (tableThreads != null || tableThreads.length != 0) {
-                tables = new Table[tableThreads.length];
-
-                // Convert each TableThread to it's underlying Table object
-                for (int i = 0; i < tableThreads.length; i++) {
-                    tables[i] = tableThreads[i].getTable();
-                }
-            } else {
-                tables = new Table[0];
-            }
-            // Count active players using a helper method; use dealer ID for tracking
-            int activePlayers = server.getClientsInLobbySize();
-            // made a getter for lobby size to compile since .getPlayersInLobby() doesn't work
-            int dealerId = req.getDealerId();
+            Table[] tables = server.getTables();
+            // Count active players using a helper method
+            int activePlayers = server.getPlayersInLobby().length;
+            int activeDealers = server.getDealersInLobby().length;
 
 //            //-------------NOTE------------------
 //            // dummy vals to compile
 //            Table[] tables = new Table[1];
 //            int dummyPlayerCount = 6;
 //            int dummyDealerCount = 1;
-            sendNetworkMessage(new Message.LobbyData.Response(tables,activePlayers,dealerId));
+            sendNetworkMessage(new Message.LobbyData.Response(tables,activePlayers,activeDealers));
         });
         addMessageHook(Message.GameData.Request.class, (req) -> {
             System.out.println("GameData request");
@@ -129,14 +117,21 @@ public class PlayerClientThread extends ClientThreadWithHooks {
         });
         addMessageHook(Message.TableData.Request.class, (req) -> {
             System.out.println("TableData request");
-            // Table table = server.getTableById(req.getTableId());
+            // These are placeholders; we can replace with real table/game logic later
+            int tableId = req.getTableId();
 
-            //-------------NOTE------------------
-            // dummy vals to compile
-            int dummyDealerID = 1;
-            int[] dummyPlayerIDs = {1,2,3,4};
-            int dummyPlayersJoined = 4;
-            sendNetworkMessage(new Message.TableData.Response(dummyDealerID,dummyPlayerIDs,dummyPlayersJoined));
+            Table table = server.getTableById(tableId);
+            Dealer dealer = table.getDealer();
+            Player[] playerList = table.getPlayers();
+            int playersJoined = table.getPlayerCount();
+
+            Player[] players = new Player[table.getPlayerCount()];
+            for (int i = 0; i < players.length; i++) {
+                players[i] = playerList[i];
+            }
+
+            // Respond with table metadata
+            sendNetworkMessage(new Message.TableData.Response(players, dealer , playersJoined));
         });
         addMessageHook(Message.Split.Request.class, (req)->{
             System.out.println("Split request");

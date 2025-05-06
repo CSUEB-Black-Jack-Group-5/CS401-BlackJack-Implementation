@@ -28,6 +28,7 @@ public class DealerTableBlackJack extends JFrame {
     private JButton drawCardButton;
     private JButton payPlayerButton;
     private JButton shuffleButton;
+    private JButton startGameButton;
     private JButton leaveButton;
 
     /// Player positions
@@ -56,7 +57,7 @@ public class DealerTableBlackJack extends JFrame {
     /// Custom colors
     private static final Color TABLE_BACKGROUND = new Color(0, 80, 20);  // Darker green
     private static final Color TABLE_PATTERN = new Color(0, 70, 20);     // Pattern color
-    private static final Color TABLE_COLOR = new Color(30, 90, 110);   // Deep teal
+    private static final Color TABLE_COLOR = new Color(30, 90, 110);     // Deep teal
     private static final Color GOLD_ACCENT = new Color(212, 175, 55);    // Gold accent
 
     // Custom fonts
@@ -179,12 +180,14 @@ public class DealerTableBlackJack extends JFrame {
         drawCardButton = createStyledButton("Draw Card", new Color(40, 167, 69), Color.WHITE);
         payPlayerButton = createStyledButton("Pay Player", new Color(255, 193, 7), Color.BLACK);
         shuffleButton = createStyledButton("Shuffle Deck", new Color(23, 162, 184), Color.WHITE);
+        startGameButton = createStyledButton("Start Game", new Color(220, 53, 69), Color.WHITE);
         leaveButton = createStyledButton("Leave Table", new Color(220, 53, 69), Color.WHITE);
 
         /// Set initial button states
         drawCardButton.setEnabled(false);
         payPlayerButton.setEnabled(false);
         shuffleButton.setEnabled(true);
+        startGameButton.setEnabled(false);
 
         /// Control panel with sleek transparent background
         controlPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
@@ -262,6 +265,7 @@ public class DealerTableBlackJack extends JFrame {
         controlPanel.add(drawCardButton);
         controlPanel.add(payPlayerButton);
         controlPanel.add(shuffleButton);
+        controlPanel.add(startGameButton);
 
         // Create separate panel for leave button (right-aligned)
         JPanel leaveButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -413,6 +417,10 @@ public class DealerTableBlackJack extends JFrame {
             animateShuffleDeck();
 
         });
+
+        startGameButton.addActionListener(e -> {
+            // handle start game logic
+        });
     }
 
     // Draw a card for a random player (demo functionality)
@@ -500,6 +508,7 @@ public class DealerTableBlackJack extends JFrame {
         shuffleButton.setEnabled(false);
         drawCardButton.setEnabled(false);
         payPlayerButton.setEnabled(false);
+        startGameButton.setEnabled(false);
 
         // Create a shuffling effect
         JDialog shuffleDialog = new JDialog(this, "Shuffling", false);
@@ -565,9 +574,12 @@ public class DealerTableBlackJack extends JFrame {
             }
 
             // Re-enable buttons
+            // -------NOTE!-------- need to fix this because it should be the buttons' original state
+            // instead of all true
             shuffleButton.setEnabled(true);
             drawCardButton.setEnabled(true);
             payPlayerButton.setEnabled(true);
+            startGameButton.setEnabled(true);
 
             // Refresh display
             revalidate();
@@ -661,5 +673,26 @@ public class DealerTableBlackJack extends JFrame {
     private void requestShuffle() {
         //Message.Shuffle.Request request = new Message.Shuffle.Request();
         //BlackjackGame.client.sendNetworkMessage(request);
+    }
+
+    public void refreshTable() {
+        occupancyLabel.setText("<html><b>PLAYERS:</b> " + occupancy + "/" + maxPlayers + "</html>");
+
+        for (int i = 0; i < maxPlayers; i++) {
+            if (i < occupancy) {
+                playerPositions.get(i).setOccupied(true);
+            } else {
+                playerPositions.get(i).setOccupied(false);
+            }
+        }
+    }
+
+    public void updateTableData(Message.TableData.Response tableDataResponse) {
+        /// Update the dealer table data
+        // update player count
+        occupancy = tableDataResponse.getPlayersJoined();
+
+        /// Refresh UI
+        refreshTable();
     }
 }

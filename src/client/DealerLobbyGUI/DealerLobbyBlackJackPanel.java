@@ -253,11 +253,7 @@ public class DealerLobbyBlackJackPanel extends JPanel {
     }
 
     private void createNewTable() {
-        // dummy values
-        dealerName = "testingDealer";
-        dealerId = 0;
-
-        Message.CreateTable.Request request = new Message.CreateTable.Request(dealerName);
+        Message.CreateTable.Request request = new Message.CreateTable.Request();
         BlackjackGame.client.sendNetworkMessage(request);
     }
 
