@@ -1,3 +1,5 @@
+package tests;
+
 import game.Wallet;
 import org.junit.Test;
 
