@@ -29,16 +29,19 @@ This project is a multiplayer Blackjack game developed in Java using a client-se
 ---
 
 ## 📁 Folder Structure
-/res/db/
-├── users.csv
-├── dealers.csv
-├── allPlayers/
-│ ├── <username>_funds.csv
-│ └── <username>_history.csv
-└── players/
-└── <username>/
-├── funds.csv
-└── history.csv
+```text
+res/
+└── db/
+    ├── users.csv
+    ├── dealers.csv
+    ├── allPlayers/
+    │   ├── <username>_funds.csv
+    │   └── <username>_history.csv
+    └── players/
+        └── <username>/
+            ├── funds.csv
+            └── history.csv
+```
 ---
 
 ## 💻 How to Run
