@@ -30,17 +30,34 @@ This project is a multiplayer Blackjack game developed in Java using a client-se
 
 ## 📁 Folder Structure
 ```text
-res/
-└── db/
-    ├── users.csv
-    ├── dealers.csv
-    ├── allPlayers/
-    │   ├── <username>_funds.csv
-    │   └── <username>_history.csv
-    └── players/
-        └── <username>/
-            ├── funds.csv
-            └── history.csv
+CS401-BlackJack-Implementation/
+├── res/
+│   └── db/
+│       ├── users.csv
+│       ├── dealers.csv
+│       ├── allPlayers/
+│       │   ├── basim_funds.csv
+│       │   └── basim_history.csv
+│       └── players/
+│           └── basim/
+│               ├── funds.csv
+│               └── history.csv
+├── src/
+│   ├── client/
+│   │   ├── DealerLobbyGUI/
+│   │   ├── DealerTable/
+│   │   ├── gui/
+│   │   ├── PlayerLobbyGUI/
+│   │   ├── PlayerTable/
+│   │   ├── test_gui/
+│   ├── dbHelper/
+│   ├── game/
+│   ├── networking/
+│   ├── server/
+│   └── tests/
+├── .idea/
+├── README.md
+└── .classpath / .project / etc.
 ```
 ---
 
