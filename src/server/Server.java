@@ -9,10 +9,14 @@ import networking.Message;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 
 import dbHelper.CSVDatabaseHelper;
 
@@ -22,6 +26,8 @@ public class Server {
     private int connectClientsSize;
     private final ClientThreadWithHooks[] clientsInLobby;
     private int clientsInLobbySize;
+
+    private HashMap<Class<Message>, List<ClientThreadWithHooks>> events;
 
     private Thread connectionThread;
 
@@ -33,6 +39,21 @@ public class Server {
     ServerSocket serverSocket;
     int port;
     boolean running;
+
+    /**
+        @description: Register a new event listener for event T (T must extend Message)
+     */
+    public <T extends Message> void registerClientWithEvent(ClientThreadWithHooks client, T event) {
+        events.get(event.getClass()).add(client);
+    }
+    /**
+     @description: Looks at the registered clients for event T, and sends the message 'event' to it
+     */
+    public <T extends Message> void fireEvent(T event) {
+        for (ClientThreadWithHooks client : events.get(event.getClass())) {
+            client.sendNetworkMessage(event);
+        }
+    }
 
     /**
      * @apiNote For internal use only for the main connection thread
@@ -158,6 +179,7 @@ public class Server {
 
         tables = new Hashtable<>();
         tablesSize = 0;
+        events = new HashMap<>();
     }
     public void startServer() {
         connectionThread = new Thread(this::connectionHandler);
